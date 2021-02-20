@@ -9,7 +9,7 @@ interface Config {
 
 const envVarsSchema = Joi.object({
   NODE_ENV: Joi.string()
-    .allow('development', 'production')
+    .allow('development', 'staging', 'production')
     .default('development'),
   PORT: Joi.number().default(3000),
   PGHOST: Joi.string().required(),
@@ -37,9 +37,6 @@ const config: Config = {
       user: envVars.PGUSER,
       password: envVars.PGPASSWORD,
       database: envVars.PGDATABASE,
-    },
-    migrations: {
-      tableName: 'knex_migrations',
     },
   },
 }
