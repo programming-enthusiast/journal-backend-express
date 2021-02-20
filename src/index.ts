@@ -1,7 +1,10 @@
+import dotenv from 'dotenv'
+
+dotenv.config()
+
 import app from './app'
+import config from './config'
 
-const port = 3000
-
-app.listen(port, () => {
-  console.log(`Journal app listening at port ${port}`)
+app.listen(config.port, () => {
+  console.log(`Journal app listening at port ${config.port}`)
 })

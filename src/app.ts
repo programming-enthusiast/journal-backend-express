@@ -1,8 +1,8 @@
 import express from 'express'
-import journalRouter from './journal/journal-router'
+import journalsRouter from './journals/journals-router'
 
 const app = express()
 
-app.use('/', journalRouter)
+app.use('/', journalsRouter)
 
 export default app
