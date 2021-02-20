@@ -1,1 +1,1 @@
-# Journal Server - Express
+# Journal Backend - Express
