@@ -48,7 +48,7 @@ describe('journals-service', () => {
     })
 
     test('Given a non-existing id then it should throw', async () => {
-      // Assert
+      // Act and Assert
       await expect(
         journalsService.getJournal('non-existing-id')
       ).rejects.toThrow(NotFoundError)

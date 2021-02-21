@@ -6,7 +6,7 @@ const router = express.Router()
 router.post('/', async (_req: Request, res: Response) => {
   const journal = await journalsService.createJournal()
 
-  res.json(journal)
+  res.status(201).json(journal)
 })
 
 export default router
