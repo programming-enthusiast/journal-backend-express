@@ -4,6 +4,8 @@ import inspirationsRouter from './inspirations/inspirations-router'
 
 const app = express()
 
+app.use(express.json())
+
 app.use('/api/v1/journals', journalsRouter)
 app.use('/api/v1/inspirations', inspirationsRouter)
 
