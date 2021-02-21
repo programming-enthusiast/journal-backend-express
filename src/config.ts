@@ -4,16 +4,20 @@ import { Config as KnexConfig } from 'knex'
 interface Config {
   env: string
   port: number
-  pg: KnexConfig
+  db: KnexConfig
 }
+
+// See https://en.wikipedia.org/wiki/Port_(computer_networking)
+const minPort = 0
+const maxPort = Math.pow(2, 16) - 1
 
 const envVarsSchema = Joi.object({
   NODE_ENV: Joi.string()
-    .allow('development', 'staging', 'production')
+    .valid('development', 'test', 'production')
     .default('development'),
-  PORT: Joi.number().default(3000),
+  PORT: Joi.number().integer().min(minPort).max(maxPort).default(3000),
   PGHOST: Joi.string().required(),
-  PGPORT: Joi.number().integer().required(),
+  PGPORT: Joi.number().integer().min(minPort).max(maxPort).required(),
   PGUSER: Joi.string().required(),
   PGPASSWORD: Joi.string().required(),
   PGDATABASE: Joi.string().required(),
@@ -29,8 +33,8 @@ if (error) {
 const config: Config = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
-  pg: {
-    client: 'pg',
+  db: {
+    client: 'postgresql',
     connection: {
       host: envVars.PGHOST,
       port: envVars.PGPORT,
