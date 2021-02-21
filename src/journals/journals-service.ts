@@ -3,6 +3,7 @@ import { Journal } from './journal';
 import db, { tables } from '../infrastructure/db';
 import { JournalEntry } from './journal-entry';
 import { QueryMethods } from '../common/order/query-methods';
+import { NotFoundError } from '../errors';
 
 export const createJournal = async (): Promise<Journal> => {
   const values: Partial<Journal> = {
@@ -16,7 +17,7 @@ export const createJournal = async (): Promise<Journal> => {
   return result[0];
 };
 
-export const getJournal = async (id: string): Promise<Journal | null> => {
+const getJournal = async (id: string): Promise<Journal | null> => {
   const journal = await db<Journal>(tables.journals).where('id', id).first();
 
   if (!journal) {
@@ -35,17 +36,23 @@ export const createOrUpdateEntry = async (
   title: string,
   text: string
 ): Promise<JournalEntry> => {
+  const journal = await getJournal(journalId);
+
+  if (!journal) {
+    throw new NotFoundError('Journal not found');
+  }
+
   const now = new Date();
 
   const todayEntry = await db<JournalEntry>(tables.entries)
     .select('id')
-    .where('journalId', journalId)
+    .where('journalId', journal.id)
     .andWhereRaw('created_at::date = ?::date', [now])
     .first();
 
   const entry: Partial<JournalEntry> = {
     id: todayEntry?.id || nanoid(),
-    journalId,
+    journalId: journal.id,
     title,
     text,
   };
@@ -59,6 +66,16 @@ export const createOrUpdateEntry = async (
   return result[0];
 };
 
+const getEntry = async (id: string): Promise<JournalEntry | null> => {
+  const entry = await db<JournalEntry>(tables.entries).where('id', id).first();
+
+  if (!entry) {
+    return null;
+  }
+
+  return entry;
+};
+
 export const updateEntry = async (
   journalId: string,
   entryId: string,
@@ -66,10 +83,24 @@ export const updateEntry = async (
     Omit<JournalEntry, 'journalId' | 'id' | 'createdAt' | 'updatedAt'>
   >
 ): Promise<JournalEntry> => {
-  const now = new Date();
+  const journal = await getJournal(journalId);
+
+  if (!journal) {
+    throw new NotFoundError('Journal not found');
+  }
+
+  const entry = await getEntry(entryId);
+
+  if (!entry) {
+    throw new NotFoundError('Journal Entry not found');
+  }
+
+  if (Object.keys(data).length === 0) {
+    return entry;
+  }
 
   const result = await db<JournalEntry>(tables.entries)
-    .update({ ...data, updatedAt: now })
+    .update(data)
     .where('id', entryId)
     .andWhere('journalId', journalId)
     .returning('*');
@@ -81,7 +112,6 @@ export const listEntries = async (
   queryMethods?: QueryMethods<JournalEntry>
 ): Promise<JournalEntry[]> => {
   return await db<JournalEntry>(tables.entries)
-    .select()
     .where(queryMethods?.where ? queryMethods.where : {})
     .orderBy(queryMethods?.orderBy ? queryMethods.orderBy : []);
 };
