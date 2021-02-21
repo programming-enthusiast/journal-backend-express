@@ -3,6 +3,6 @@ import journalsRouter from './journals/journals-router'
 
 const app = express()
 
-app.use('/', journalsRouter)
+app.use('/api/v1/journals', journalsRouter)
 
 export default app

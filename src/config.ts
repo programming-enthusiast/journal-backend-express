@@ -38,6 +38,9 @@ const config: Config = {
       password: envVars.PGPASSWORD,
       database: envVars.PGDATABASE,
     },
+    migrations: {
+      directory: `${__dirname}/infrastructure/db/migrations`,
+    },
   },
 }
 
