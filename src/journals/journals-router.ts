@@ -1,4 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
+import { StatusCodes } from 'http-status-codes';
+import { ErrorCodes, NotFoundError, ResponseError } from '../errors';
+import { JournalEntry } from './journal-entry';
 import * as journalsService from './journals-service';
 
 const router = express.Router();
@@ -21,11 +24,24 @@ router.post(
 
       const { title, text } = req.body;
 
-      const entry = await journalsService.createOrUpdateEntry(
-        journalId,
-        title,
-        text
-      );
+      let entry: JournalEntry;
+
+      try {
+        entry = await journalsService.createOrUpdateEntry(
+          journalId,
+          title,
+          text
+        );
+      } catch (err) {
+        if (err instanceof NotFoundError) {
+          throw new ResponseError(
+            StatusCodes.NOT_FOUND,
+            ErrorCodes.ItemNotFound,
+            err.message
+          );
+        }
+        throw err;
+      }
 
       res.status(201).send(entry);
     } catch (err) {

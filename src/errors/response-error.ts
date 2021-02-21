@@ -1,9 +1,10 @@
-import { ErrorCode } from './error-code';
+import { StatusCodes } from 'http-status-codes';
+import { ErrorCodes } from './error-codes';
 
 export class ResponseError extends Error {
   constructor(
-    public readonly status: number,
-    public readonly code: ErrorCode,
+    public readonly status: StatusCodes,
+    public readonly code: ErrorCodes,
     public readonly message: string
   ) {
     super(message);
