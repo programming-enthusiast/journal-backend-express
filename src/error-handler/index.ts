@@ -1,9 +1,9 @@
-import { Response } from 'express'
-import { ErrorCode, ResponseError } from '../errors'
+import { Response } from 'express';
+import { ErrorCode, ResponseError } from '../errors';
 
 class ErrorHandler {
   public async handleError(error: Error, res: Response): Promise<void> {
-    console.log(error)
+    console.log(error);
 
     if (error instanceof ResponseError) {
       res.status(error.status).json({
@@ -11,18 +11,18 @@ class ErrorHandler {
           code: error.code,
           message: error.message,
         },
-      })
+      });
     } else {
       res.status(500).json({
         error: {
           code: ErrorCode.generalException,
           message: 'Internal Server Error',
         },
-      })
+      });
     }
   }
 }
 
-const errorHandler = new ErrorHandler()
+const errorHandler = new ErrorHandler();
 
-export default errorHandler
+export default errorHandler;

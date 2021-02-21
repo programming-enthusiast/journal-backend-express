@@ -1,4 +1,4 @@
-import * as inspirationsService from '../../../inspirations/inspirations-service'
+import * as inspirationsService from '../../../inspirations/inspirations-service';
 
 export const seed = async (): Promise<void> => {
   const inspirations = [
@@ -368,11 +368,11 @@ export const seed = async (): Promise<void> => {
     'Volunteer at your local food pantry',
     'Look at pictures and videos of cute animals',
     "Watch a movie you'd never usually watch",
-  ]
+  ];
 
   await Promise.all(
     inspirations.map(
       async (activity) => await inspirationsService.createInspiration(activity)
     )
-  )
-}
+  );
+};

@@ -3,4 +3,4 @@ module.exports = {
   testEnvironment: 'node',
   setupFiles: ['dotenv/config'],
   setupFilesAfterEnv: ['<rootDir>/test-setup/destroy-db-connection.ts'],
-}
+};

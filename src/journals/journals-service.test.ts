@@ -1,57 +1,57 @@
-import db, { tables } from '../infrastructure/db'
-import { Journal } from './journal'
-import * as journalsService from './journals-service'
+import db, { tables } from '../infrastructure/db';
+import { Journal } from './journal';
+import * as journalsService from './journals-service';
 
 describe('journals-service', () => {
   beforeAll(async () => {
-    await db.migrate.rollback()
-  })
+    await db.migrate.rollback();
+  });
 
   beforeEach(async () => {
-    await db.migrate.latest()
-  })
+    await db.migrate.latest();
+  });
 
   afterEach(async () => {
-    await db.migrate.rollback()
-  })
+    await db.migrate.rollback();
+  });
 
   describe('createJournal', () => {
     test('Should create a Journal', async () => {
       // Act
-      const result = await journalsService.createJournal()
+      const result = await journalsService.createJournal();
 
       // Assert
-      const journal = await journalsService.getJournal(result.id)
+      const journal = await journalsService.getJournal(result.id);
 
-      expect(result).toStrictEqual(journal)
-    })
-  })
+      expect(result).toStrictEqual(journal);
+    });
+  });
 
   describe('getJournal', () => {
     const journal: Journal = {
       id: 'id',
       createdAt: new Date(),
       updatedAt: new Date(),
-    }
+    };
 
     beforeEach(async () => {
-      await db<Journal>(tables.journals).insert(journal)
-    })
+      await db<Journal>(tables.journals).insert(journal);
+    });
 
     test('Given an existing id then it should return a Journal', async () => {
       // Act
-      const result = await journalsService.getJournal(journal.id)
+      const result = await journalsService.getJournal(journal.id);
 
       // Assert
-      expect(result).toStrictEqual(journal)
-    })
+      expect(result).toStrictEqual(journal);
+    });
 
     test('Given a non-existing id then it should return null', async () => {
       // Act
-      const result = await journalsService.getJournal('non-existing-id')
+      const result = await journalsService.getJournal('non-existing-id');
 
       // Assert
-      expect(result).toBeNull()
-    })
-  })
-})
+      expect(result).toBeNull();
+    });
+  });
+});

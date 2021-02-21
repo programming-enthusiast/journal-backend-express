@@ -6,6 +6,6 @@ export const ON_UPDATE_TIMESTAMP_FUNCTION = `
     RETURN NEW;
   END;
 $$ language 'plpgsql';
-`
+`;
 
-export const DROP_ON_UPDATE_TIMESTAMP_FUNCTION = `DROP FUNCTION on_update_timestamp`
+export const DROP_ON_UPDATE_TIMESTAMP_FUNCTION = `DROP FUNCTION on_update_timestamp`;

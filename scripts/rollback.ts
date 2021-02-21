@@ -1,8 +1,8 @@
-import db from '../src/infrastructure/db'
+import db from '../src/infrastructure/db';
 
 export const run = async (): Promise<void> => {
-  await db.migrate.rollback()
-  process.exit()
-}
+  await db.migrate.rollback();
+  process.exit();
+};
 
-run()
+run();

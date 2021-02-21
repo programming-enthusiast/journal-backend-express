@@ -1,23 +1,23 @@
-import { Inspiration } from './inspiration'
+import { Inspiration } from './inspiration';
 
-import { nanoid } from 'nanoid'
-import db, { tables } from '../infrastructure/db'
+import { nanoid } from 'nanoid';
+import db, { tables } from '../infrastructure/db';
 
 export const createInspiration = async (text: string): Promise<Inspiration> => {
-  const now = new Date()
+  const now = new Date();
 
   const inspiration: Inspiration = {
     id: nanoid(),
     text,
     createdAt: now,
     updatedAt: now,
-  }
+  };
 
-  await db<Inspiration>(tables.inspirations).insert(inspiration)
+  await db<Inspiration>(tables.inspirations).insert(inspiration);
 
-  return inspiration
-}
+  return inspiration;
+};
 
 export const listInspirations = async (): Promise<Inspiration[]> => {
-  return await db<Inspiration>(tables.inspirations).select()
-}
+  return await db<Inspiration>(tables.inspirations).select();
+};
