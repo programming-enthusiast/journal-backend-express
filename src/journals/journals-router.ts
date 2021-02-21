@@ -56,11 +56,21 @@ router.patch(
     try {
       const { journalId, entryId } = req.params;
 
-      const entry = await journalsService.updateEntry(
-        journalId,
-        entryId,
-        req.body
-      );
+      let entry: JournalEntry;
+
+      try {
+        entry = await journalsService.updateEntry(journalId, entryId, req.body);
+      } catch (err) {
+        if (err instanceof NotFoundError) {
+          throw new ResponseError(
+            StatusCodes.NOT_FOUND,
+            ErrorCodes.ItemNotFound,
+            err.message
+          );
+        }
+
+        throw err;
+      }
 
       res.status(200).send(entry);
     } catch (err) {
