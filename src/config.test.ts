@@ -257,5 +257,25 @@ describe('config', () => {
         })
       })
     })
+
+    describe('migrations', () => {
+      test('Should be point to the correct migrations directory', () => {
+        const config = require('./config').default
+
+        expect(config.db.migrations.directory).toBe(
+          `${__dirname}/infrastructure/db/migrations`
+        )
+      })
+    })
+
+    describe('seeds', () => {
+      test('Should be point to the correct seeds directory', () => {
+        const config = require('./config').default
+
+        expect(config.db.seeds.directory).toBe(
+          `${__dirname}/infrastructure/db/seeds`
+        )
+      })
+    })
   })
 })

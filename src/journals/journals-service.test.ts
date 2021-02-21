@@ -1,5 +1,5 @@
 import { NotFoundError } from '../errors'
-import db from '../infrastructure/db'
+import db, { tables } from '../infrastructure/db'
 import { Journal } from './journal'
 import * as journalsService from './journals-service'
 
@@ -36,7 +36,7 @@ describe('journals-service', () => {
     }
 
     beforeEach(async () => {
-      await db<Journal>('journals').insert(journal)
+      await db<Journal>(tables.journals).insert(journal)
     })
 
     test('Given an existing id then it should return a Journal', async () => {

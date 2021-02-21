@@ -1,7 +1,7 @@
 export interface JournalEntry {
   id: string
   journalId: string
-  inspirationId: string
+  title: string
   text: string
   createdAt: Date
   updatedAt: Date

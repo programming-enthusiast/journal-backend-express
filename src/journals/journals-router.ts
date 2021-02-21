@@ -9,4 +9,12 @@ router.post('/', async (_req: Request, res: Response) => {
   res.status(201).json(journal)
 })
 
+router.post('/{journalId}/entries', async (req: Request, res: Response) => {
+  console.log('req', req)
+
+  res.status(201).send()
+})
+
+router
+
 export default router

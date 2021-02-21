@@ -45,6 +45,9 @@ const config: Config = {
     migrations: {
       directory: `${__dirname}/infrastructure/db/migrations`,
     },
+    seeds: {
+      directory: `${__dirname}/infrastructure/db/seeds`,
+    },
   },
 }
 
