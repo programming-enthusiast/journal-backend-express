@@ -1,72 +1,80 @@
 import { nanoid } from 'nanoid'
 import { Journal } from './journal'
 import db, { tables } from '../infrastructure/db'
-import { NotFoundError } from '../errors'
 import { JournalEntry } from './journal-entry'
 import { QueryMethods } from '../common/order/query-methods'
 
 export const createJournal = async (): Promise<Journal> => {
-  const now = new Date()
-
-  const journal: Journal = {
+  const values: Partial<Journal> = {
     id: nanoid(),
-    createdAt: now,
-    updatedAt: now,
   }
 
-  await db<Journal>(tables.journals).insert(journal)
+  const result = await db<Journal>(tables.journals)
+    .insert(values)
+    .returning('*')
 
-  return journal
+  return result[0]
 }
 
-export const getJournal = async (id: string): Promise<Journal> => {
+export const getJournal = async (id: string): Promise<Journal | null> => {
   const journal = await db<Journal>(tables.journals).where('id', id).first()
 
   if (!journal) {
-    throw new NotFoundError('Journal not found')
+    return null
   }
 
   return journal
 }
 
-export const upsertEntry = async (
+/**
+ * Creates a new JournalEntry or updates it if there is one already created for the
+ * current date.
+ */
+export const createOrUpdateEntry = async (
   journalId: string,
   title: string,
   text: string
 ): Promise<JournalEntry> => {
-  const journal = await getJournal(journalId)
-
-  if (!journal) {
-    throw new NotFoundError('Journal not found')
-  }
-
   const now = new Date()
 
-  let entry: JournalEntry
-
   const todayEntry = await db<JournalEntry>(tables.entries)
+    .select('id')
     .where('journalId', journalId)
     .andWhereRaw('created_at::date = ?::date', [now])
     .first()
 
-  if (!todayEntry) {
-    entry = {
-      id: nanoid(),
-      journalId,
-      title,
-      text,
-      createdAt: now,
-      updatedAt: now,
-    }
-
-    await db<Journal>(tables.entries).insert(entry)
-  } else {
-    entry = { ...todayEntry, title, text, updatedAt: now }
-
-    await db<Journal>(tables.entries).where('id', entry.id).update(entry)
+  const entry: Partial<JournalEntry> = {
+    id: todayEntry?.id || nanoid(),
+    journalId,
+    title,
+    text,
   }
 
-  return entry
+  const result = await db<JournalEntry>(tables.entries)
+    .insert(entry)
+    .onConflict('id')
+    .merge()
+    .returning('*')
+
+  return result[0]
+}
+
+export const updateEntry = async (
+  journalId: string,
+  entryId: string,
+  data: Partial<
+    Omit<JournalEntry, 'journalId' | 'id' | 'createdAt' | 'updatedAt'>
+  >
+): Promise<JournalEntry> => {
+  const now = new Date()
+
+  const result = await db<JournalEntry>(tables.entries)
+    .update({ ...data, updatedAt: now })
+    .where('id', entryId)
+    .andWhere('journalId', journalId)
+    .returning('*')
+
+  return result[0]
 }
 
 export const listEntries = async (

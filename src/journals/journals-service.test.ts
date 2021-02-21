@@ -1,4 +1,3 @@
-import { NotFoundError } from '../errors'
 import db, { tables } from '../infrastructure/db'
 import { Journal } from './journal'
 import * as journalsService from './journals-service'
@@ -47,11 +46,12 @@ describe('journals-service', () => {
       expect(result).toStrictEqual(journal)
     })
 
-    test('Given a non-existing id then it should throw', async () => {
-      // Act and Assert
-      await expect(
-        journalsService.getJournal('non-existing-id')
-      ).rejects.toThrow(NotFoundError)
+    test('Given a non-existing id then it should return null', async () => {
+      // Act
+      const result = await journalsService.getJournal('non-existing-id')
+
+      // Assert
+      expect(result).toBeNull()
     })
   })
 })
