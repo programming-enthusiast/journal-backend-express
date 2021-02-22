@@ -224,7 +224,7 @@ describe('journals-service', () => {
       // Act and Assert
       await expect(
         journalsService.updateEntry(nonExistingJournalId, entry.id, update)
-      ).rejects.toThrow(new NotFoundError('Journal not found'));
+      ).rejects.toThrow(NotFoundError);
     });
 
     test('Given a non-existing Entry id then should throw', async () => {
@@ -236,7 +236,7 @@ describe('journals-service', () => {
       // Act and Assert
       await expect(
         journalsService.updateEntry(entry.journalId, nonExistingEntryId, update)
-      ).rejects.toThrow(new NotFoundError('Journal Entry not found'));
+      ).rejects.toThrow(NotFoundError);
     });
   });
 

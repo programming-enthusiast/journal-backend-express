@@ -1,12 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { toOrderBy } from '../common/query-methods';
-import {
-  ErrorCodes,
-  InvalidArgumentError,
-  NotFoundError,
-  ResponseError,
-} from '../errors';
+import { ErrorCodes, NotFoundError, ResponseError } from '../errors';
 import { JournalEntry } from './journal-entry';
 import * as journalsService from './journals-service';
 

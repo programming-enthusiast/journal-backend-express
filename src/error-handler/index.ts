@@ -1,10 +1,11 @@
 import { ReasonPhrases } from 'http-status-codes';
 import { Response } from 'express';
 import { ErrorCodes, ResponseError } from '../errors';
+import logger from '../logger';
 
 class ErrorHandler {
   public async handleError(error: Error, res: Response): Promise<void> {
-    console.log(error);
+    logger.error(error);
 
     if (error instanceof ResponseError) {
       res.status(error.status).json({

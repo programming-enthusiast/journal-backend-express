@@ -1,6 +1,5 @@
 import { ReasonPhrases } from 'http-status-codes';
 import request, { Response } from 'supertest';
-import { zip } from 'lodash';
 import app from '../app';
 import { ErrorCodes, NotFoundError } from '../errors';
 import { Journal } from './journal';

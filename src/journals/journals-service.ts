@@ -3,7 +3,7 @@ import { Journal } from './journal';
 import db, { tables } from '../infrastructure/db';
 import { JournalEntry } from './journal-entry';
 import { QueryMethods } from '../common/query-methods';
-import { InvalidArgumentError, NotFoundError } from '../errors';
+import { NotFoundError } from '../errors';
 
 export const createJournal = async (): Promise<Journal> => {
   const values: Partial<Journal> = {
@@ -39,7 +39,7 @@ export const createOrUpdateEntry = async (
   const journal = await getJournal(journalId);
 
   if (!journal) {
-    throw new NotFoundError('Journal not found');
+    throw new NotFoundError(`Journal ${journalId} not found`);
   }
 
   const now = new Date();
@@ -86,13 +86,13 @@ export const updateEntry = async (
   const journal = await getJournal(journalId);
 
   if (!journal) {
-    throw new NotFoundError('Journal not found');
+    throw new NotFoundError(`Journal ${journalId} not found`);
   }
 
   const entry = await getEntry(entryId);
 
   if (!entry) {
-    throw new NotFoundError('Journal Entry not found');
+    throw new NotFoundError(`Journal Entry ${entryId} not found`);
   }
 
   if (Object.keys(data).length === 0) {
