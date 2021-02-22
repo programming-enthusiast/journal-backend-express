@@ -1,5 +1,6 @@
 import { ReasonPhrases } from 'http-status-codes';
 import request, { Response } from 'supertest';
+import { zip } from 'lodash';
 import app from '../app';
 import { ErrorCodes, NotFoundError } from '../errors';
 import { Journal } from './journal';
@@ -33,13 +34,11 @@ describe('journals-router', () => {
           .expect(201)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
-            expect(response.body.id).toBe(journal.id);
-            expect(response.body.createdAt).toBe(
-              journal.createdAt.toISOString()
-            );
-            expect(response.body.updatedAt).toBe(
-              journal.updatedAt.toISOString()
-            );
+            expect(response.body).toStrictEqual({
+              ...journal,
+              createdAt: journal.createdAt.toISOString(),
+              updatedAt: journal.updatedAt.toISOString(),
+            });
           })
           .catch((err) => {
             throw err;
@@ -60,10 +59,12 @@ describe('journals-router', () => {
           .expect(500)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
-            expect(response.body.error.code).toBe(ErrorCodes.GeneralException);
-            expect(response.body.error.message).toBe(
-              ReasonPhrases.INTERNAL_SERVER_ERROR
-            );
+            expect(response.body).toStrictEqual({
+              error: {
+                code: ErrorCodes.GeneralException,
+                message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+              },
+            });
           })
           .catch((err) => {
             throw err;
@@ -95,11 +96,11 @@ describe('journals-router', () => {
           .expect(201)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
-            expect(response.body.id).toBe(entry.id);
-            expect(response.body.title).toBe(entry.title);
-            expect(response.body.text).toBe(entry.text);
-            expect(response.body.createdAt).toBe(entry.createdAt.toISOString());
-            expect(response.body.updatedAt).toBe(entry.updatedAt.toISOString());
+            expect(response.body).toStrictEqual({
+              ...entry,
+              createdAt: entry.createdAt.toISOString(),
+              updatedAt: entry.updatedAt.toISOString(),
+            });
           })
           .catch((err) => {
             throw err;
@@ -122,8 +123,12 @@ describe('journals-router', () => {
           .expect(404)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
-            expect(response.body.error.code).toBe(ErrorCodes.ItemNotFound);
-            expect(response.body.error.message).toBe(message);
+            expect(response.body).toStrictEqual({
+              error: {
+                code: ErrorCodes.ItemNotFound,
+                message,
+              },
+            });
           })
           .catch((err) => {
             throw err;
@@ -144,10 +149,12 @@ describe('journals-router', () => {
           .expect(500)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
-            expect(response.body.error.code).toBe(ErrorCodes.GeneralException);
-            expect(response.body.error.message).toBe(
-              ReasonPhrases.INTERNAL_SERVER_ERROR
-            );
+            expect(response.body).toStrictEqual({
+              error: {
+                code: ErrorCodes.GeneralException,
+                message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+              },
+            });
           })
           .catch((err) => {
             throw err;
@@ -177,11 +184,11 @@ describe('journals-router', () => {
           .expect(200)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
-            expect(response.body.id).toBe(entry.id);
-            expect(response.body.title).toBe(entry.title);
-            expect(response.body.text).toBe(entry.text);
-            expect(response.body.createdAt).toBe(entry.createdAt.toISOString());
-            expect(response.body.updatedAt).toBe(entry.updatedAt.toISOString());
+            expect(response.body).toStrictEqual({
+              ...entry,
+              createdAt: entry.createdAt.toISOString(),
+              updatedAt: entry.updatedAt.toISOString(),
+            });
           })
           .catch((err) => {
             throw err;
@@ -204,8 +211,12 @@ describe('journals-router', () => {
           .expect(404)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
-            expect(response.body.error.code).toBe(ErrorCodes.ItemNotFound);
-            expect(response.body.error.message).toBe(message);
+            expect(response.body).toStrictEqual({
+              error: {
+                code: ErrorCodes.ItemNotFound,
+                message,
+              },
+            });
           })
           .catch((err) => {
             throw err;
@@ -228,8 +239,12 @@ describe('journals-router', () => {
           .expect(404)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
-            expect(response.body.error.code).toBe(ErrorCodes.ItemNotFound);
-            expect(response.body.error.message).toBe(message);
+            expect(response.body).toStrictEqual({
+              error: {
+                code: ErrorCodes.ItemNotFound,
+                message,
+              },
+            });
           })
           .catch((err) => {
             throw err;
@@ -250,15 +265,134 @@ describe('journals-router', () => {
           .expect(500)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
-            expect(response.body.error.code).toBe(ErrorCodes.GeneralException);
-            expect(response.body.error.message).toBe(
-              ReasonPhrases.INTERNAL_SERVER_ERROR
-            );
+            expect(response.body).toStrictEqual({
+              error: {
+                code: ErrorCodes.GeneralException,
+                message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+              },
+            });
           })
           .catch((err) => {
             throw err;
           });
       });
+    });
+
+    describe('GET /:journalId/entries', () => {
+      const journalId = 'journalId';
+
+      const entries: JournalEntry[] = [
+        {
+          id: 'id',
+          journalId,
+          title: 'title',
+          text: 'text',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 'another id',
+          journalId,
+          title: 'another title',
+          text: 'another text',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
+
+      const url = `${baseUrl}/${journalId}/entries`;
+
+      test('Should get a list of Entries by Journal id', () => {
+        // Arrange
+        jest
+          .spyOn(journalsService, 'listEntries')
+          .mockResolvedValueOnce(entries);
+
+        // Act and Assert
+        return request(app)
+          .get(url)
+          .expect(200)
+          .expect('Content-Type', /json/)
+          .then((response: Response) => {
+            expect(journalsService.listEntries).toBeCalledWith({
+              where: {
+                journalId,
+              },
+              orderBy: [],
+            });
+
+            expect(response.body).toStrictEqual([
+              {
+                ...entries[0],
+                createdAt: entries[0].createdAt.toISOString(),
+                updatedAt: entries[0].updatedAt.toISOString(),
+              },
+              {
+                ...entries[1],
+                createdAt: entries[1].createdAt.toISOString(),
+                updatedAt: entries[1].updatedAt.toISOString(),
+              },
+            ]);
+          })
+          .catch((err) => {
+            throw err;
+          });
+      });
+
+      test('Given optional orderBy query param then should return ordered list', () => {
+        // Arrange
+        jest
+          .spyOn(journalsService, 'listEntries')
+          .mockResolvedValueOnce(entries);
+
+        // Act and Assert
+        return request(app)
+          .get(`${url}?orderBy=created desc/title`)
+          .expect(200)
+          .expect('Content-Type', /json/)
+          .then(() => {
+            expect(journalsService.listEntries).toBeCalledWith({
+              where: {
+                journalId,
+              },
+              orderBy: [
+                {
+                  column: 'created',
+                  order: 'desc',
+                },
+                {
+                  column: 'title',
+                  order: 'asc',
+                },
+              ],
+            });
+          })
+          .catch((err) => {
+            throw err;
+          });
+      });
+
+      test.each([['orderBy[]=first&orderBy[]=second', 'first,second']])(
+        'Given invalid orderBy %p then should return 400',
+        (invalidOrderBy, errorMessage) => {
+          // Act and Assert
+          return request(app)
+            .get(`${url}?${invalidOrderBy}`)
+            .expect(400)
+            .expect('Content-Type', /json/)
+            .then((response: Response) => {
+              expect(response.body).toStrictEqual({
+                error: {
+                  code: ErrorCodes.InvalidParameterFormat,
+                  message: `Invalid orderBy ${errorMessage}`,
+                },
+              });
+            })
+            .catch((err) => {
+              throw err;
+            });
+        }
+      );
     });
   });
 });

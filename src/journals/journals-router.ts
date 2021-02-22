@@ -1,6 +1,12 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { ErrorCodes, NotFoundError, ResponseError } from '../errors';
+import { toOrderBy } from '../common/query-methods';
+import {
+  ErrorCodes,
+  InvalidArgumentError,
+  NotFoundError,
+  ResponseError,
+} from '../errors';
 import { JournalEntry } from './journal-entry';
 import * as journalsService from './journals-service';
 
@@ -85,9 +91,19 @@ router.get(
     try {
       const { journalId } = req.params;
 
+      const { orderBy } = req.query;
+
+      if (orderBy && typeof orderBy !== 'string') {
+        throw new ResponseError(
+          StatusCodes.BAD_REQUEST,
+          ErrorCodes.InvalidParameterFormat,
+          `Invalid orderBy ${orderBy}`
+        );
+      }
+
       const entries = await journalsService.listEntries({
         where: { journalId },
-        orderBy: [{ column: 'createdAt', order: 'asc' }],
+        orderBy: orderBy ? toOrderBy(orderBy) : [],
       });
 
       res.json(entries);

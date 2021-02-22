@@ -2,8 +2,8 @@ import { nanoid } from 'nanoid';
 import { Journal } from './journal';
 import db, { tables } from '../infrastructure/db';
 import { JournalEntry } from './journal-entry';
-import { QueryMethods } from '../common/order/query-methods';
-import { NotFoundError } from '../errors';
+import { QueryMethods } from '../common/query-methods';
+import { InvalidArgumentError, NotFoundError } from '../errors';
 
 export const createJournal = async (): Promise<Journal> => {
   const values: Partial<Journal> = {
