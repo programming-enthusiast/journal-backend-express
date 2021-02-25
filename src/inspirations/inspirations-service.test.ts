@@ -56,4 +56,27 @@ describe('inspirations-service', () => {
       expect(result).toStrictEqual(expectedEntries);
     });
   });
+
+  describe('deleteInspiration', () => {
+    const setup = async (): Promise<Inspiration> => {
+      return await inspirationsService.createInspiration(
+        'Learn how to use an Arduino'
+      );
+    };
+
+    test('Given an existing id then it should delete the Inspiration', async () => {
+      // Arrange
+      const inspiration = await setup();
+
+      // Act
+      await inspirationsService.deleteInspiration(inspiration.id);
+
+      // Assert
+      await expect(
+        db<Inspiration>(tables.inspirations)
+          .select('id')
+          .where('id', inspiration.id)
+      ).resolves.toStrictEqual([]);
+    });
+  });
 });

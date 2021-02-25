@@ -19,3 +19,7 @@ export const createInspiration = async (text: string): Promise<Inspiration> => {
 export const listInspirations = async (): Promise<Inspiration[]> => {
   return await db<Inspiration>(tables.inspirations);
 };
+
+export const deleteInspiration = async (id: string): Promise<void> => {
+  await db<Inspiration>(tables.inspirations).where('id', id).del();
+};
