@@ -1,4 +1,5 @@
 import { isToday } from 'date-fns';
+import { NotFoundError } from '../errors';
 import db, { tables } from '../infrastructure/db';
 import { Inspiration } from './inspiration';
 import * as inspirationsService from './inspirations-service';
@@ -77,6 +78,13 @@ describe('inspirations-service', () => {
           .select('id')
           .where('id', inspiration.id)
       ).resolves.toStrictEqual([]);
+    });
+
+    test('Given a non-existing id then it should throw NotFoundError', async () => {
+      // Act and Assert
+      await expect(
+        inspirationsService.deleteInspiration('non-existing-id')
+      ).rejects.toThrow(NotFoundError);
     });
   });
 });

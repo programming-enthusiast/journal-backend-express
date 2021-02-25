@@ -1,7 +1,7 @@
 import { ReasonPhrases } from 'http-status-codes';
 import request, { Response } from 'supertest';
 import app from '../app';
-import { ErrorCodes } from '../errors';
+import { ErrorCodes, NotFoundError } from '../errors';
 import { Inspiration } from './inspiration';
 import * as inspirationsService from './inspirations-service';
 
@@ -130,6 +130,84 @@ describe('inspirations-router', () => {
         // Act and Assert
         return request(app)
           .get(baseUrl)
+          .expect(500)
+          .expect('Content-Type', /json/)
+          .then((response: Response) => {
+            expect(response.body).toStrictEqual({
+              error: {
+                code: ErrorCodes.GeneralException,
+                message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+              },
+            });
+          })
+          .catch((err) => {
+            throw err;
+          });
+      });
+    });
+
+    describe('DELETE /:id', () => {
+      const id = 'id';
+
+      const url = `${baseUrl}/${id}`;
+
+      test('Given an existing id then should delete the Inspiration and return 204', () => {
+        // Arrange
+        jest
+          .spyOn(inspirationsService, 'deleteInspiration')
+          .mockResolvedValueOnce();
+
+        // Act and Assert
+        return request(app)
+          .delete(url)
+          .expect(204)
+          .then((response: Response) => {
+            expect(response.body).toStrictEqual({});
+          })
+          .catch((err) => {
+            throw err;
+          });
+      });
+
+      test('Given a non-existing id then should return 404', () => {
+        // Arrange
+        const message = `Inspiration id ${id} not found`;
+
+        jest
+          .spyOn(inspirationsService, 'deleteInspiration')
+          .mockImplementationOnce(() => {
+            throw new NotFoundError(message);
+          });
+
+        // Act and Assert
+        return request(app)
+          .delete(url)
+          .expect(404)
+          .expect('Content-Type', /json/)
+          .then((response: Response) => {
+            expect(response.body).toStrictEqual({
+              error: {
+                code: ErrorCodes.ItemNotFound,
+                message,
+              },
+            });
+          })
+          .catch((err) => {
+            throw err;
+          });
+      });
+
+      test('Given operation failure then should return 500', () => {
+        // Arrange
+        jest
+          .spyOn(inspirationsService, 'deleteInspiration')
+          .mockImplementationOnce(() => {
+            throw new Error();
+          });
+
+        // Act and Assert
+        return request(app)
+          .delete(url)
           .expect(500)
           .expect('Content-Type', /json/)
           .then((response: Response) => {

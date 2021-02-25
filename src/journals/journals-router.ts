@@ -11,7 +11,7 @@ router.post('/', async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const journal = await journalsService.createJournal();
 
-    res.status(201).json(journal);
+    res.status(StatusCodes.CREATED).json(journal);
   } catch (err) {
     next(err);
   }
@@ -44,7 +44,7 @@ router.post(
         throw err;
       }
 
-      res.status(201).send(entry);
+      res.status(StatusCodes.CREATED).send(entry);
     } catch (err) {
       next(err);
     }
@@ -73,7 +73,7 @@ router.patch(
         throw err;
       }
 
-      res.status(200).send(entry);
+      res.send(entry);
     } catch (err) {
       next(err);
     }
