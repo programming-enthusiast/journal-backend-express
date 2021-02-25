@@ -1,9 +1,14 @@
 import Joi from 'joi';
 import { Config as KnexConfig } from 'knex';
 
+type LogLevel = 'silent' | 'trace' | 'info';
+
 interface Config {
   env: string;
   port: number;
+  log: {
+    level: LogLevel;
+  };
   db: KnexConfig;
 }
 
@@ -33,6 +38,18 @@ if (error) {
 const config: Config = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
+  log: {
+    level: ((): LogLevel => {
+      switch (envVars.NODE_ENV) {
+        case 'test':
+          return 'silent';
+        case 'production':
+          return 'info';
+        default:
+          return 'trace';
+      }
+    })(),
+  },
   db: {
     client: 'postgresql',
     connection: {

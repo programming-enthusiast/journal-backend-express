@@ -102,6 +102,25 @@ describe('config', () => {
     );
   });
 
+  describe('log', () => {
+    describe('level', () => {
+      test.each([
+        ['development', 'trace'],
+        ['test', 'silent'],
+        ['production', 'info'],
+      ])(
+        "Given environment %p then should be '%p'",
+        (environment, expectedLevel) => {
+          process.env.NODE_ENV = environment;
+
+          const config = require('./config').default;
+
+          expect(config.log.level).toBe(expectedLevel);
+        }
+      );
+    });
+  });
+
   describe('db', () => {
     describe('client', () => {
       test('Should be postgresql', () => {
