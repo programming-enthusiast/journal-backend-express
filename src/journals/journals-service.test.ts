@@ -1,5 +1,5 @@
 import { isToday, isAfter, endOfYesterday } from 'date-fns';
-import { orderBy, zip } from 'lodash';
+import { orderBy, zip, omit } from 'lodash';
 import { Order } from '../common/order';
 import { NotFoundError } from '../errors';
 import db, { tables } from '../infrastructure/db';
@@ -8,31 +8,28 @@ import { JournalEntry } from './journal-entry';
 import * as journalsService from './journals-service';
 
 describe('journals-service', () => {
-  beforeAll(async () => {
-    await db.migrate.rollback();
-  });
+  const cleanDb = async () => {
+    await db<JournalEntry>(tables.entries).delete();
+    await db<Journal>(tables.journals).delete();
+  };
 
-  beforeEach(async () => {
-    await db.migrate.latest();
-  });
+  beforeEach(cleanDb);
 
-  afterEach(async () => {
-    await db.migrate.rollback();
-  });
+  afterAll(cleanDb);
 
   describe('createJournal', () => {
     test('Should create a Journal', async () => {
       // Act
-      const journal = await journalsService.createJournal();
+      const result = await journalsService.createJournal();
 
       // Assert
-      const dbJournal = await db<Journal>(tables.journals)
-        .where('id', journal.id)
+      const expectedResult = await db<Journal>(tables.journals)
+        .where('id', result.id)
         .first();
 
-      expect(journal).toStrictEqual(dbJournal);
-      expect(isToday(journal.createdAt)).toBe(true);
-      expect(journal.createdAt).toEqual(journal.updatedAt);
+      expect(result).toStrictEqual(expectedResult);
+      expect(isToday(result.createdAt)).toBe(true);
+      expect(result.createdAt).toEqual(result.updatedAt);
     });
   });
 
@@ -54,21 +51,18 @@ describe('journals-service', () => {
       const { journal, title, text } = await setup();
 
       // Act
-      const entry = await journalsService.createOrUpdateEntry(
+      const result = await journalsService.createOrUpdateEntry(
         journal.id,
         title,
         text
       );
 
       // Assert
-      const dbEntry = await db<JournalEntry>(tables.entries)
-        .where('id', entry.id)
+      const expectedResult = await db<JournalEntry>(tables.entries)
+        .where('id', result.id)
         .first();
 
-      expect(entry).toStrictEqual(dbEntry);
-      expect(entry.journalId).toBe(journal.id);
-      expect(entry.title).toBe(title);
-      expect(entry.text).toBe(text);
+      expect(result).toStrictEqual(expectedResult);
       expect(isToday(journal.createdAt)).toBe(true);
       expect(journal.createdAt).toEqual(journal.updatedAt);
     });
@@ -88,21 +82,26 @@ describe('journals-service', () => {
       const newText = 'new text';
 
       // Act
-      const updatedEntry = await journalsService.createOrUpdateEntry(
+      const result = await journalsService.createOrUpdateEntry(
         journal.id,
         newTitle,
         newText
       );
 
       // Assert
-      expect(updatedEntry.id).toBe(entry.id);
-      expect(updatedEntry.journalId).toBe(entry.journalId);
-      expect(updatedEntry.title).toBe(newTitle);
-      expect(updatedEntry.text).toBe(newText);
-      expect(updatedEntry.createdAt).toEqual(entry.createdAt);
-      expect(isAfter(updatedEntry.updatedAt, updatedEntry.createdAt)).toBe(
-        true
+      expect(result).toMatchObject(
+        omit(
+          {
+            ...entry,
+            title: newTitle,
+            text: newText,
+            createdAt: entry.createdAt,
+          },
+          'updatedAt'
+        )
       );
+
+      expect(isAfter(result.updatedAt, result.createdAt)).toBe(true);
     });
 
     test('Given there exists an Entry from a previous day and no Entry for today then should create a new Entry', async () => {
@@ -124,7 +123,7 @@ describe('journals-service', () => {
       const yesterdayEntry = yesterdayInsertResult[0];
 
       // Act
-      const entry = await journalsService.createOrUpdateEntry(
+      const result = await journalsService.createOrUpdateEntry(
         journal.id,
         title,
         text
@@ -134,9 +133,9 @@ describe('journals-service', () => {
       const entries = await db<JournalEntry>(tables.entries);
 
       expect(entries.length).toBe(2);
-      expect(entry.journalId).toBe(yesterdayEntry.journalId);
-      expect(isAfter(entry.createdAt, yesterdayEntry.createdAt)).toBe(true);
-      expect(isAfter(entry.updatedAt, yesterdayEntry.updatedAt)).toBe(true);
+      expect(result.journalId).toBe(yesterdayEntry.journalId);
+      expect(isAfter(result.createdAt, yesterdayEntry.createdAt)).toBe(true);
+      expect(isAfter(result.updatedAt, yesterdayEntry.updatedAt)).toBe(true);
     });
 
     test('Given an non-existing Journal id then should throw', async () => {
@@ -183,21 +182,26 @@ describe('journals-service', () => {
       const { entry, update } = await setup();
 
       // Act
-      const updatedEntry = await journalsService.updateEntry(
+      const result = await journalsService.updateEntry(
         entry.journalId,
         entry.id,
         update
       );
 
       // Assert
-      expect(updatedEntry.id).toBe(entry.id);
-      expect(updatedEntry.journalId).toBe(entry.journalId);
-      expect(updatedEntry.title).toBe(update.title);
-      expect(updatedEntry.text).toBe(update.text);
-      expect(updatedEntry.createdAt).toEqual(entry.createdAt);
-      expect(isAfter(updatedEntry.updatedAt, updatedEntry.createdAt)).toBe(
-        true
+      expect(result).toMatchObject(
+        omit(
+          {
+            ...entry,
+            title: update.title,
+            text: update.text,
+            createdAt: entry.createdAt,
+          },
+          'updatedAt'
+        )
       );
+
+      expect(isAfter(result.updatedAt, result.createdAt)).toBe(true);
     });
 
     test('Given empty update then should return existing Entry', async () => {
@@ -205,14 +209,14 @@ describe('journals-service', () => {
       const { entry } = await setup();
 
       // Act
-      const updatedEntry = await journalsService.updateEntry(
+      const result = await journalsService.updateEntry(
         entry.journalId,
         entry.id,
         {}
       );
 
       // Assert
-      expect(updatedEntry).toStrictEqual(entry);
+      expect(result).toStrictEqual(entry);
     });
 
     test('Given a non-existing Journal id then should throw', async () => {
@@ -302,12 +306,13 @@ describe('journals-service', () => {
       const { journalOneEntries, journalTwoEntries } = await setup();
 
       // Act
-      const entries = await journalsService.listEntries();
+      const result = await journalsService.listEntries();
 
       // Assert
-      expect(entries).toEqual(
-        expect.arrayContaining([...journalOneEntries, ...journalTwoEntries])
-      );
+      expect(result).toStrictEqual([
+        ...journalOneEntries,
+        ...journalTwoEntries,
+      ]);
     });
 
     test('Given queryMethods where then should return the corresponsing entries', async () => {
@@ -315,14 +320,14 @@ describe('journals-service', () => {
       const { journalOneEntries } = await setup();
 
       // Act
-      const entries = await journalsService.listEntries({
+      const result = await journalsService.listEntries({
         where: {
           journalId: journalOneEntries[0].journalId,
         },
       });
 
       // Assert
-      expect(entries).toEqual(expect.arrayContaining(journalOneEntries));
+      expect(result).toStrictEqual(journalOneEntries);
     });
 
     test('Given queryMethods where then should return the corresponsing entries', async () => {
@@ -330,14 +335,14 @@ describe('journals-service', () => {
       const { journalOneEntries } = await setup();
 
       // Act
-      const entries = await journalsService.listEntries({
+      const result = await journalsService.listEntries({
         where: {
           journalId: journalOneEntries[0].journalId,
         },
       });
 
       // Assert
-      expect(entries).toEqual(expect.arrayContaining(journalOneEntries));
+      expect(result).toStrictEqual(journalOneEntries);
     });
 
     test.each(['asc' as Order, 'desc' as Order])(
@@ -346,19 +351,19 @@ describe('journals-service', () => {
         // Arrange
         const { journalOneEntries, journalTwoEntries } = await setup();
 
-        const expectedSortedArray = orderBy(
+        const expectedResult = orderBy(
           [...journalOneEntries, ...journalTwoEntries],
           ['createdAt'],
           [order]
         );
 
         // Act
-        const entries = await journalsService.listEntries({
+        const result = await journalsService.listEntries({
           orderBy: [{ column: 'createdAt', order }],
         });
 
         // Assert
-        for (const pair of zip(entries, expectedSortedArray)) {
+        for (const pair of zip(result, expectedResult)) {
           expect(pair[0]).toStrictEqual(pair[1]);
         }
       }

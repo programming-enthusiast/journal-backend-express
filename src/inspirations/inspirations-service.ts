@@ -4,20 +4,18 @@ import { nanoid } from 'nanoid';
 import db, { tables } from '../infrastructure/db';
 
 export const createInspiration = async (text: string): Promise<Inspiration> => {
-  const now = new Date();
-
-  const inspiration: Inspiration = {
+  const inspiration: Partial<Inspiration> = {
     id: nanoid(),
     text,
-    createdAt: now,
-    updatedAt: now,
   };
 
-  await db<Inspiration>(tables.inspirations).insert(inspiration);
+  const result = await db<Inspiration>(tables.inspirations)
+    .insert(inspiration)
+    .returning('*');
 
-  return inspiration;
+  return result[0];
 };
 
 export const listInspirations = async (): Promise<Inspiration[]> => {
-  return await db<Inspiration>(tables.inspirations).select();
+  return await db<Inspiration>(tables.inspirations);
 };
