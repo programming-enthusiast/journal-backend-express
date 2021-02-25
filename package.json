@@ -19,7 +19,7 @@
     "express"
   ],
   "author": "Marcus Vinicius Monteiro de Souza",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "devDependencies": {
     "@types/express": "^4.17.11",
     "@types/jest": "^26.0.20",
