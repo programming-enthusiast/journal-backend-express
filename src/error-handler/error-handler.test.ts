@@ -1,8 +1,8 @@
+import { ErrorCodes, ResponseError } from '../errors';
+import { ErrorResponse } from './error-response';
 import { Response } from 'express';
 import errorHandler from '.';
-import { ErrorCodes, ResponseError } from '../errors';
 import logger from '../logger';
-import { ErrorResponse } from './error-response';
 
 describe('error-handler', () => {
   let mockResponse: Partial<Response>;

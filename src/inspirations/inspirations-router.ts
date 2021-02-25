@@ -1,7 +1,7 @@
+import * as inspirationsService from './inspirations-service';
+import { ErrorCodes, NotFoundError, ResponseError } from '../errors';
 import express, { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { ErrorCodes, NotFoundError, ResponseError } from '../errors';
-import * as inspirationsService from './inspirations-service';
 
 const router = express.Router();
 

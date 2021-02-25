@@ -1,10 +1,10 @@
-import { ReasonPhrases } from 'http-status-codes';
-import request, { Response } from 'supertest';
-import app from '../app';
+import * as journalsService from './journals-service';
 import { ErrorCodes, NotFoundError } from '../errors';
+import request, { Response } from 'supertest';
 import { Journal } from './journal';
 import { JournalEntry } from './journal-entry';
-import * as journalsService from './journals-service';
+import { ReasonPhrases } from 'http-status-codes';
+import app from '../app';
 
 describe('journals-router', () => {
   afterEach(() => {

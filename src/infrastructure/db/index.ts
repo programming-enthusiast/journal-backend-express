@@ -1,6 +1,6 @@
+import config from '../../config';
 import knex from 'knex';
 import knexStringcase from 'knex-stringcase';
-import config from '../../config';
 
 export const tables = {
   journals: 'journals',

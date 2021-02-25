@@ -1,9 +1,9 @@
-import { ReasonPhrases } from 'http-status-codes';
-import request, { Response } from 'supertest';
-import app from '../app';
-import { ErrorCodes, NotFoundError } from '../errors';
-import { Inspiration } from './inspiration';
 import * as inspirationsService from './inspirations-service';
+import { ErrorCodes, NotFoundError } from '../errors';
+import request, { Response } from 'supertest';
+import { Inspiration } from './inspiration';
+import { ReasonPhrases } from 'http-status-codes';
+import app from '../app';
 
 describe('inspirations-router', () => {
   afterEach(() => {

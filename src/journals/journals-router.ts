@@ -1,9 +1,9 @@
-import express, { Request, Response, NextFunction } from 'express';
+import * as journalsService from './journals-service';
+import { ErrorCodes, NotFoundError, ResponseError } from '../errors';
+import express, { NextFunction, Request, Response } from 'express';
+import { JournalEntry } from './journal-entry';
 import { StatusCodes } from 'http-status-codes';
 import { toOrderBy } from '../common/query-methods';
-import { ErrorCodes, NotFoundError, ResponseError } from '../errors';
-import { JournalEntry } from './journal-entry';
-import * as journalsService from './journals-service';
 
 const router = express.Router();
 

@@ -1,11 +1,11 @@
-import { isToday, isAfter, endOfYesterday } from 'date-fns';
-import { orderBy, zip, omit } from 'lodash';
-import { Order } from '../common/order';
-import { NotFoundError } from '../errors';
+import * as journalsService from './journals-service';
 import db, { tables } from '../infrastructure/db';
+import { endOfYesterday, isAfter, isToday } from 'date-fns';
+import { omit, orderBy, zip } from 'lodash';
 import { Journal } from './journal';
 import { JournalEntry } from './journal-entry';
-import * as journalsService from './journals-service';
+import { NotFoundError } from '../errors';
+import { Order } from '../common/order';
 
 describe('journals-service', () => {
   const cleanDb = async () => {

@@ -1,5 +1,5 @@
-import { StatusCodes } from 'http-status-codes';
 import { ErrorCodes } from './error-codes';
+import { StatusCodes } from 'http-status-codes';
 
 export class ResponseError extends Error {
   constructor(

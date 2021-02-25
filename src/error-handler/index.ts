@@ -1,8 +1,8 @@
+import { ErrorCodes, ResponseError } from '../errors';
+import { ErrorResponse } from './error-response';
 import { ReasonPhrases } from 'http-status-codes';
 import { Response } from 'express';
-import { ErrorCodes, ResponseError } from '../errors';
 import logger from '../logger';
-import { ErrorResponse } from './error-response';
 
 class ErrorHandler {
   public async handleError(error: Error, res: Response): Promise<void> {

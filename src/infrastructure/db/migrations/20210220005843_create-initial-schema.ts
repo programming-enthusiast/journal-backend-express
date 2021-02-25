@@ -1,7 +1,7 @@
 import * as Knex from 'knex';
-import { tables } from '..';
 import * as functions from '../functions';
 import * as triggers from '../triggers';
+import { tables } from '..';
 
 export async function up(knex: Knex): Promise<void> {
   await knex.raw(functions.ON_UPDATE_TIMESTAMP_FUNCTION);
