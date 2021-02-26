@@ -1,6 +1,6 @@
-import { Order, Orders } from '../order';
+import { Ordering, Orderings } from '../types/ordering';
 
-type OrderBy = { column: string; order: Order }[];
+type OrderBy = { column: string; order: Ordering }[];
 
 export interface QueryMethods<T> {
   where?: Partial<T>;
@@ -19,7 +19,7 @@ export const toOrderBy = (input: string): OrderBy => {
   return columnOrderPairs.map((pair) => {
     return {
       column: pair[0],
-      order: pair[1] in Orders ? (pair[1] as Order) : Orders.asc,
+      order: pair[1] in Orderings ? (pair[1] as Ordering) : Orderings.asc,
     };
   });
 };

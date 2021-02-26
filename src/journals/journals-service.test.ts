@@ -5,7 +5,7 @@ import { omit, orderBy, zip } from 'lodash';
 import { Journal } from './journal';
 import { JournalEntry } from './journal-entry';
 import { NotFoundError } from '../errors';
-import { Order } from '../common/order';
+import { Ordering } from '../types/ordering';
 
 describe('journals-service', () => {
   const cleanDb = async () => {
@@ -345,9 +345,9 @@ describe('journals-service', () => {
       expect(result).toStrictEqual(journalOneEntries);
     });
 
-    test.each(['asc' as Order, 'desc' as Order])(
+    test.each(['asc' as Ordering, 'desc' as Ordering])(
       'Given queryMethods orderBy then should return the corresponsing entries ordered by %p',
-      async (order: Order) => {
+      async (order: Ordering) => {
         // Arrange
         const { journalOneEntries, journalTwoEntries } = await setup();
 

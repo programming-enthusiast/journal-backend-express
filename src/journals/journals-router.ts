@@ -3,7 +3,7 @@ import { ErrorCodes, NotFoundError, ResponseError } from '../errors';
 import express, { NextFunction, Request, Response } from 'express';
 import { JournalEntry } from './journal-entry';
 import { StatusCodes } from 'http-status-codes';
-import { toOrderBy } from '../common/query-methods';
+import { toOrderBy } from '../query-methods';
 
 const router = express.Router();
 

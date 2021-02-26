@@ -2,7 +2,7 @@ import db, { tables } from '../infrastructure/db';
 import { Journal } from './journal';
 import { JournalEntry } from './journal-entry';
 import { NotFoundError } from '../errors';
-import { QueryMethods } from '../common/query-methods';
+import { QueryMethods } from '../query-methods';
 import { nanoid } from 'nanoid';
 
 export const createJournal = async (): Promise<Journal> => {
