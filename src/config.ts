@@ -1,4 +1,4 @@
-import Joi from 'joi';
+import { Joi } from 'celebrate';
 import { Config as KnexConfig } from 'knex';
 
 type LogLevel = 'silent' | 'trace' | 'info';

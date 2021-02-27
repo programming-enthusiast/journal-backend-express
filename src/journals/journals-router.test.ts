@@ -5,6 +5,8 @@ import { Journal } from './journal';
 import { JournalEntry } from './journal-entry';
 import { ReasonPhrases } from 'http-status-codes';
 import app from '../app';
+import { omit } from 'lodash';
+import { orderByRegex } from '../query/options/order-by';
 
 describe('journals-router', () => {
   afterEach(() => {
@@ -72,11 +74,15 @@ describe('journals-router', () => {
     });
 
     describe('POST /:journalId/entries', () => {
+      const requestBody = {
+        title: 'title',
+        text: 'text',
+      };
+
       const entry: JournalEntry = {
         id: 'id',
         journalId: 'journalId',
-        title: 'title',
-        text: 'text',
+        ...requestBody,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -92,6 +98,7 @@ describe('journals-router', () => {
         // Act and Assert
         return request(app)
           .post(url)
+          .send(requestBody)
           .expect(201)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
@@ -99,6 +106,46 @@ describe('journals-router', () => {
               ...entry,
               createdAt: entry.createdAt.toISOString(),
               updatedAt: entry.updatedAt.toISOString(),
+            });
+          })
+          .catch((err) => {
+            throw err;
+          });
+      });
+
+      test('Given title is undefined then should return 400', () => {
+        // Act and Assert
+        return request(app)
+          .post(url)
+          .send(omit(requestBody, 'title'))
+          .expect(400)
+          .expect('Content-Type', /json/)
+          .then((response: Response) => {
+            expect(response.body).toStrictEqual({
+              error: {
+                code: ErrorCodes.InvalidRequest,
+                message: '"title" is required',
+              },
+            });
+          })
+          .catch((err) => {
+            throw err;
+          });
+      });
+
+      test('Given text is undefined then should return 400', () => {
+        // Act and Assert
+        return request(app)
+          .post(url)
+          .send(omit(requestBody, 'text'))
+          .expect(400)
+          .expect('Content-Type', /json/)
+          .then((response: Response) => {
+            expect(response.body).toStrictEqual({
+              error: {
+                code: ErrorCodes.InvalidRequest,
+                message: '"text" is required',
+              },
             });
           })
           .catch((err) => {
@@ -119,6 +166,7 @@ describe('journals-router', () => {
         // Act and Assert
         return request(app)
           .post(url)
+          .send(requestBody)
           .expect(404)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
@@ -145,6 +193,7 @@ describe('journals-router', () => {
         // Act and Assert
         return request(app)
           .post(url)
+          .send(requestBody)
           .expect(500)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
@@ -162,11 +211,15 @@ describe('journals-router', () => {
     });
 
     describe('PATCH /:journalId/entries/:entryId', () => {
+      const requestBody = {
+        title: 'title',
+        text: 'text',
+      };
+
       const entry: JournalEntry = {
         id: 'id',
         journalId: 'journalId',
-        title: 'title',
-        text: 'text',
+        ...requestBody,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -180,6 +233,7 @@ describe('journals-router', () => {
         // Act and Assert
         return request(app)
           .patch(url)
+          .send(requestBody)
           .expect(200)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
@@ -194,6 +248,29 @@ describe('journals-router', () => {
           });
       });
 
+      test.each([null, {}, []])(
+        'Given title is not a string then should return 400',
+        (title) => {
+          // Act and Assert
+          return request(app)
+            .patch(url)
+            .send({ title })
+            .expect(400)
+            .expect('Content-Type', /json/)
+            .then((response: Response) => {
+              expect(response.body).toStrictEqual({
+                error: {
+                  code: ErrorCodes.InvalidRequest,
+                  message: '"title" must be a string',
+                },
+              });
+            })
+            .catch((err) => {
+              throw err;
+            });
+        }
+      );
+
       test('Given a non-existing Journal id then should return 404', () => {
         // Arrange
         const message = 'Journal not found';
@@ -207,6 +284,7 @@ describe('journals-router', () => {
         // Act and Assert
         return request(app)
           .patch(url)
+          .send(requestBody)
           .expect(404)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
@@ -235,6 +313,7 @@ describe('journals-router', () => {
         // Act and Assert
         return request(app)
           .patch(url)
+          .send(requestBody)
           .expect(404)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
@@ -261,6 +340,7 @@ describe('journals-router', () => {
         // Act and Assert
         return request(app)
           .patch(url)
+          .send(requestBody)
           .expect(500)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
@@ -371,9 +451,9 @@ describe('journals-router', () => {
           });
       });
 
-      test.each([['orderBy[]=first&orderBy[]=second', 'first,second']])(
-        'Given invalid orderBy %p then should return 400',
-        (invalidOrderBy, errorMessage) => {
+      test.each([['orderBy[]=first&orderBy[]=second']])(
+        'Given non-string orderBy then should return 400',
+        (invalidOrderBy) => {
           // Act and Assert
           return request(app)
             .get(`${url}?${invalidOrderBy}`)
@@ -382,8 +462,8 @@ describe('journals-router', () => {
             .then((response: Response) => {
               expect(response.body).toStrictEqual({
                 error: {
-                  code: ErrorCodes.InvalidParameterFormat,
-                  message: `Invalid orderBy ${errorMessage}`,
+                  code: ErrorCodes.InvalidRequest,
+                  message: '"orderBy" must be a string',
                 },
               });
             })
@@ -392,6 +472,60 @@ describe('journals-router', () => {
             });
         }
       );
+
+      test.each([
+        [
+          'created_at invalid-ordering',
+          'created_at/',
+          'created_at desc/title/',
+        ],
+      ])(
+        'Given invalid orderBy %p then should return 400',
+        (invalidOrderBy) => {
+          // Act and Assert
+          return request(app)
+            .get(`${url}?orderBy=${invalidOrderBy}`)
+            .expect(400)
+            .expect('Content-Type', /json/)
+            .then((response: Response) => {
+              expect(response.body).toStrictEqual({
+                error: {
+                  code: ErrorCodes.InvalidRequest,
+                  message: `"orderBy" with value "${invalidOrderBy}" fails to match the required pattern: ${orderByRegex}`,
+                },
+              });
+            })
+            .catch((err) => {
+              throw err;
+            });
+        }
+      );
+
+      test('Given failure then should return 500', () => {
+        // Arrange
+        jest
+          .spyOn(journalsService, 'listEntries')
+          .mockImplementationOnce(() => {
+            throw new Error();
+          });
+
+        // Act and Assert
+        return request(app)
+          .get(url)
+          .expect(500)
+          .expect('Content-Type', /json/)
+          .then((response: Response) => {
+            expect(response.body).toStrictEqual({
+              error: {
+                code: ErrorCodes.GeneralException,
+                message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+              },
+            });
+          })
+          .catch((err) => {
+            throw err;
+          });
+      });
     });
   });
 });

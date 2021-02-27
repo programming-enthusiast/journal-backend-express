@@ -1,3 +1,4 @@
+import { CelebrateError, Joi, Segments } from 'celebrate';
 import { ErrorCodes, ResponseError } from '../errors';
 import { ErrorResponse } from './error-response';
 import { Response } from 'express';
@@ -46,7 +47,36 @@ describe('error-handler', () => {
       expect(mockResponse.json).toBeCalledWith(expectedResponse);
     });
 
-    test('Given an instance of an Error other than ResponseError then should log the exception and send a json with code "generalException" and message "Internal Server Error", with http status 500', async () => {
+    test('Given an instance of CelebrateError then should log the exception and send a json with code "invalidRequest" and the Joi validation error message', async () => {
+      // Arrange
+      const validationError = new Joi.ValidationError(
+        'journalId is required',
+        {},
+        {}
+      );
+      const error = new CelebrateError();
+      error.details.set(Segments.BODY, validationError);
+
+      const spy = jest.spyOn(logger, 'error');
+
+      const expectedResponse: ErrorResponse = {
+        error: {
+          code: ErrorCodes.InvalidRequest,
+          message: validationError.message,
+        },
+      };
+
+      // Act
+      await errorHandler.handleError(error, mockResponse as Response);
+
+      // Assert
+      expect(spy).toBeCalledWith(error);
+
+      expect(mockResponse.status).toBeCalledWith(400);
+      expect(mockResponse.json).toBeCalledWith(expectedResponse);
+    });
+
+    test('Given another instance of an Error other then should log the exception and send a json with code "generalException" and message "Internal Server Error", with http status 500', async () => {
       // Arrange
       const error = new Error('Something went wrong');
 

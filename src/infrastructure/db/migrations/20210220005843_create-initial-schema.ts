@@ -25,7 +25,7 @@ export async function up(knex: Knex): Promise<void> {
     table.string('id').unique();
     table.string('journal_id').notNullable();
     table.string('title').notNullable();
-    table.string('text').notNullable();
+    table.text('text').notNullable();
     table.timestamps(true, true);
 
     table.foreign('journal_id').references('id').inTable(tables.journals);

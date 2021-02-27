@@ -2,7 +2,7 @@ import db, { tables } from '../infrastructure/db';
 import { Journal } from './journal';
 import { JournalEntry } from './journal-entry';
 import { NotFoundError } from '../errors';
-import { QueryMethods } from '../query-methods';
+import { QueryOptions } from '../query';
 import { nanoid } from 'nanoid';
 
 export const createJournal = async (): Promise<Journal> => {
@@ -109,7 +109,7 @@ export const updateEntry = async (
 };
 
 export const listEntries = async (
-  queryMethods?: QueryMethods<JournalEntry>
+  queryMethods?: QueryOptions<JournalEntry>
 ): Promise<JournalEntry[]> => {
   return await db<JournalEntry>(tables.entries)
     .where(queryMethods?.where ? queryMethods.where : {})

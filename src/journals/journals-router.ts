@@ -1,9 +1,10 @@
 import * as journalsService from './journals-service';
 import { ErrorCodes, NotFoundError, ResponseError } from '../errors';
+import { Joi, Segments, celebrate } from 'celebrate';
 import express, { NextFunction, Request, Response } from 'express';
+import { orderByRegex, toOrderBy } from '../query/options/order-by';
 import { JournalEntry } from './journal-entry';
 import { StatusCodes } from 'http-status-codes';
-import { toOrderBy } from '../query-methods';
 
 const router = express.Router();
 
@@ -19,6 +20,12 @@ router.post('/', async (_req: Request, res: Response, next: NextFunction) => {
 
 router.post(
   '/:journalId/entries',
+  celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      title: Joi.string().required(),
+      text: Joi.string().required(),
+    }),
+  }),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { journalId } = req.params;
@@ -53,6 +60,12 @@ router.post(
 
 router.patch(
   '/:journalId/entries/:entryId',
+  celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      title: Joi.string(),
+      text: Joi.string(),
+    }),
+  }),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { journalId, entryId } = req.params;
@@ -82,23 +95,24 @@ router.patch(
 
 router.get(
   '/:journalId/entries',
+  celebrate({
+    [Segments.QUERY]: {
+      orderBy: Joi.string().regex(orderByRegex),
+    },
+    [Segments.BODY]: Joi.object().keys({
+      title: Joi.string(),
+      text: Joi.string(),
+    }),
+  }),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { journalId } = req.params;
 
       const { orderBy } = req.query;
 
-      if (orderBy && typeof orderBy !== 'string') {
-        throw new ResponseError(
-          StatusCodes.BAD_REQUEST,
-          ErrorCodes.InvalidParameterFormat,
-          `Invalid orderBy ${orderBy}`
-        );
-      }
-
       const entries = await journalsService.listEntries({
         where: { journalId },
-        orderBy: orderBy ? toOrderBy(orderBy) : [],
+        orderBy: orderBy ? toOrderBy(orderBy as string) : [],
       });
 
       res.json(entries);

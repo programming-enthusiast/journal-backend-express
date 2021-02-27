@@ -1,11 +1,10 @@
-import { Ordering, Orderings } from '../types/ordering';
+import { Ordering } from '../../common/enums/ordering';
 
-type OrderBy = { column: string; order: Ordering }[];
+export type OrderBy = { column: string; order: Ordering }[];
 
-export interface QueryMethods<T> {
-  where?: Partial<T>;
-  orderBy?: OrderBy;
-}
+export const orderByRegex = new RegExp(
+  /^[a-zA-Z_]+(\s(asc|desc))?(\b\/[a-zA-Z_]+(\s(asc|desc))?)*$/
+);
 
 export const toOrderBy = (input: string): OrderBy => {
   const trimmedInput = input.trim();
@@ -19,7 +18,7 @@ export const toOrderBy = (input: string): OrderBy => {
   return columnOrderPairs.map((pair) => {
     return {
       column: pair[0],
-      order: pair[1] in Orderings ? (pair[1] as Ordering) : Orderings.asc,
+      order: pair[1] in Ordering ? (pair[1] as Ordering) : Ordering.asc,
     };
   });
 };

@@ -5,7 +5,7 @@ import { omit, orderBy, zip } from 'lodash';
 import { Journal } from './journal';
 import { JournalEntry } from './journal-entry';
 import { NotFoundError } from '../errors';
-import { Ordering } from '../types/ordering';
+import { Ordering } from '../common/enums/ordering';
 
 describe('journals-service', () => {
   const cleanDb = async () => {
