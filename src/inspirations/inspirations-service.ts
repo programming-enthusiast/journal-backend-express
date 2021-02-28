@@ -1,11 +1,9 @@
 import db, { tables } from '../infrastructure/db';
 import { Inspiration } from './inspiration';
 import { NotFoundError } from '../errors';
-import { nanoid } from 'nanoid';
 
 export const createInspiration = async (text: string): Promise<Inspiration> => {
   const inspiration: Partial<Inspiration> = {
-    id: nanoid(),
     text,
   };
 

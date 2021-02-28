@@ -10,9 +10,7 @@ export const seed = async (): Promise<void> => {
   try {
     for (let i = 0; i <= 3; i++) {
       const journalInsertResult = await db<Journal>(tables.journals)
-        .insert({
-          id: i.toString(),
-        })
+        .insert({})
         .returning('*');
 
       if (journalInsertResult.length === 0) {
@@ -23,7 +21,6 @@ export const seed = async (): Promise<void> => {
 
       for (let j = 0; j <= i; j++) {
         await db<JournalEntry>(tables.entries).insert({
-          id: `entry-${j}-from-journal-${journal.id}`,
           journalId: journal.id,
           title: sample(inspirationTexts),
           text: lorem.paragraphs(),

@@ -3,16 +3,9 @@ import { Journal } from './journal';
 import { JournalEntry } from './journal-entry';
 import { NotFoundError } from '../errors';
 import { QueryOptions } from '../query';
-import { nanoid } from 'nanoid';
 
 export const createJournal = async (): Promise<Journal> => {
-  const values: Partial<Journal> = {
-    id: nanoid(),
-  };
-
-  const result = await db<Journal>(tables.journals)
-    .insert(values)
-    .returning('*');
+  const result = await db<Journal>(tables.journals).insert({}).returning('*');
 
   return result[0];
 };
@@ -51,7 +44,7 @@ export const createOrUpdateEntry = async (
     .first();
 
   const entry: Partial<JournalEntry> = {
-    id: todayEntry?.id || nanoid(),
+    id: todayEntry?.id,
     journalId: journal.id,
     title,
     text,
