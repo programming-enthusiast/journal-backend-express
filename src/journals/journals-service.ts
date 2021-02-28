@@ -4,8 +4,10 @@ import { JournalEntry } from './journal-entry';
 import { NotFoundError } from '../errors';
 import { QueryOptions } from '../query';
 
-export const createJournal = async (): Promise<Journal> => {
-  const result = await db<Journal>(tables.journals).insert({}).returning('*');
+export const createJournal = async (title: string): Promise<Journal> => {
+  const result = await db<Journal>(tables.journals)
+    .insert({ title })
+    .returning('*');
 
   return result[0];
 };

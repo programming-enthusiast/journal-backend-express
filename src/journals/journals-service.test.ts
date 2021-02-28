@@ -19,15 +19,18 @@ describe('journals-service', () => {
 
   describe('createJournal', () => {
     test('Should create a Journal', async () => {
+      // Arrange
+      const title = 'my journal';
+
       // Act
-      const result = await journalsService.createJournal();
+      const result = await journalsService.createJournal(title);
 
       // Assert
       const expectedResult = await db<Journal>(tables.journals)
         .where('id', result.id)
         .first();
 
-      expect(result).toStrictEqual(expectedResult);
+      expect(result).toStrictEqual({ ...expectedResult, title });
       expect(isToday(result.createdAt)).toBe(true);
       expect(result.createdAt).toEqual(result.updatedAt);
     });
@@ -39,7 +42,7 @@ describe('journals-service', () => {
       title: string;
       text: string;
     }> => {
-      const journal = await journalsService.createJournal();
+      const journal = await journalsService.createJournal('my journal');
       const title = 'title';
       const text = 'text';
 
@@ -158,7 +161,7 @@ describe('journals-service', () => {
         Omit<JournalEntry, 'journalId' | 'id' | 'createdAt' | 'updatedAt'>
       >;
     }> => {
-      const journal = await journalsService.createJournal();
+      const journal = await journalsService.createJournal('my journal');
 
       const title = 'title';
       const text = 'text';
@@ -270,9 +273,9 @@ describe('journals-service', () => {
         },
       ];
 
-      const journalOne = await journalsService.createJournal();
+      const journalOne = await journalsService.createJournal('journal one');
 
-      const journalTwo = await journalsService.createJournal();
+      const journalTwo = await journalsService.createJournal('journal two');
 
       for (const datum of entriesDataOne) {
         journalOneEntries.push(

@@ -8,15 +8,25 @@ import { StatusCodes } from 'http-status-codes';
 
 const router = express.Router();
 
-router.post('/', async (_req: Request, res: Response, next: NextFunction) => {
-  try {
-    const journal = await journalsService.createJournal();
+router.post(
+  '/',
+  celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      title: Joi.string().required(),
+    }),
+  }),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { title } = req.body;
 
-    res.status(StatusCodes.CREATED).json(journal);
-  } catch (err) {
-    next(err);
+      const journal = await journalsService.createJournal(title);
+
+      res.status(StatusCodes.CREATED).json(journal);
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);
 
 router.post(
   '/:journalId/entries',

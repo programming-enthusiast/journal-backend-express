@@ -11,6 +11,7 @@ export async function up(knex: Knex): Promise<void> {
 
   await knex.schema.createTable(tables.journals, (table) => {
     table.string('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    table.string('title').notNullable();
     table.timestamps(true, true);
   });
 

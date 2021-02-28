@@ -8,7 +8,7 @@ import { sample } from 'lodash';
 export const seed = async (): Promise<void> => {
   for (let i = 0; i <= 3; i++) {
     const journalInsertResult = await db<Journal>(tables.journals)
-      .insert({})
+      .insert({ title: lorem.sentence() })
       .returning('*');
 
     const journal = journalInsertResult[0];

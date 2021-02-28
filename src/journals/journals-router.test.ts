@@ -15,8 +15,13 @@ describe('journals-router', () => {
     describe('POST /', () => {
       test('Should create a Journal', () => {
         // Arrange
+        const requestBody = {
+          title: 'my journal',
+        };
+
         const journal: Journal = {
           id: 'id',
+          title: requestBody.title,
           createdAt: new Date(),
           updatedAt: new Date(),
         };
@@ -28,6 +33,7 @@ describe('journals-router', () => {
         // Act and Assert
         return request(app)
           .post(baseUrl)
+          .send(requestBody)
           .expect(201)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
@@ -42,8 +48,31 @@ describe('journals-router', () => {
           });
       });
 
+      test('Given no title is sent then should return 400', () => {
+        // Act and Assert
+        return request(app)
+          .post(baseUrl)
+          .expect(400)
+          .expect('Content-Type', /json/)
+          .then((response: Response) => {
+            expect(response.body).toStrictEqual({
+              error: {
+                code: ErrorCodes.InvalidRequest,
+                message: '"title" is required',
+              },
+            });
+          })
+          .catch((err) => {
+            throw err;
+          });
+      });
+
       test('Given create journal fails then should return 500', () => {
         // Arrange
+        const requestBody = {
+          title: 'my journal',
+        };
+
         jest
           .spyOn(journalsService, 'createJournal')
           .mockImplementationOnce(() => {
@@ -53,6 +82,7 @@ describe('journals-router', () => {
         // Act and Assert
         return request(app)
           .post(baseUrl)
+          .send(requestBody)
           .expect(500)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
