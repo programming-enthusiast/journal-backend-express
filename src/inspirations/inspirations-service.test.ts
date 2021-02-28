@@ -54,7 +54,7 @@ describe('inspirations-service', () => {
       const result = await inspirationsService.listInspirations();
 
       // Assert
-      expect(result).toStrictEqual(expectedEntries);
+      expect(result).toEqual(expect.arrayContaining(expectedEntries));
     });
   });
 

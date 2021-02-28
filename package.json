@@ -12,8 +12,9 @@
     "migrate:latest": "ts-node -r dotenv/config scripts/migrate",
     "migrate:rollback": "ts-node -r dotenv/config scripts/rollback",
     "postinstall": "husky install",
+    "seed": "ts-node -r dotenv/config scripts/seed",
     "start": "npm run build:live",
-    "test": "jest --coverage"
+    "test": "jest --coverage --runInBand"
   },
   "keywords": [
     "express"
