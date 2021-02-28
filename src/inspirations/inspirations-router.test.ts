@@ -6,10 +6,6 @@ import { ReasonPhrases } from 'http-status-codes';
 import app from '../app';
 
 describe('inspirations-router', () => {
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   describe('/api/v1/inspirations', () => {
     const baseUrl = '/api/v1/inspirations';
 

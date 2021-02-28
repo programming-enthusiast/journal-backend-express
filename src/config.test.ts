@@ -3,7 +3,6 @@ describe('config', () => {
   const OLD_ENV = process.env;
 
   beforeEach(() => {
-    jest.resetModules();
     process.env = { ...OLD_ENV };
   });
 

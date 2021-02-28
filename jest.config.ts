@@ -14,7 +14,7 @@ export default {
   // cacheDirectory: "/private/var/folders/3m/910ry7w142sdrslvb1559kmm0000gn/T/jest_dx",
 
   // Automatically clear mock calls and instances between every test
-  clearMocks: true,
+  // clearMocks: false,
 
   // Indicates whether the coverage information should be collected while executing the test
   // collectCoverage: false,
@@ -105,7 +105,7 @@ export default {
   // resetMocks: false,
 
   // Reset the module registry before running each individual test
-  // resetModules: false,
+  resetModules: true,
 
   // A path to a custom resolver
   // resolver: undefined,

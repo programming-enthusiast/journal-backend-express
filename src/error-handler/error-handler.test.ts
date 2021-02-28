@@ -15,10 +15,6 @@ describe('error-handler', () => {
     };
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   describe('handleError', () => {
     test('Given an instance of ResponseError then should log the exception and send a json with the code and message from the Error, with http status from the Error', async () => {
       // Arrange

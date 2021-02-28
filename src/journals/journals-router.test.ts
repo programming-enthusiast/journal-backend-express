@@ -9,10 +9,6 @@ import { omit } from 'lodash';
 import { orderByRegex } from '../query/options/order-by';
 
 describe('journals-router', () => {
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   describe('/api/v1/journals', () => {
     const baseUrl = '/api/v1/journals';
 
