@@ -81,3 +81,20 @@ For integrated tests, I'm using [`supertest`](https://github.com/visionmedia/sup
 TODO
 
 ### [2.10 Catch unhandled promise rejections](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/errorhandling/catchunhandledpromiserejection.md#catch-unhandled-promise-rejections)
+
+TODO
+
+### [2.11 Fail fast, validate arguments using a dedicated library](https://github.com/goldbergyoni/nodebestpractices#-211-fail-fast-validate-arguments-using-a-dedicated-library)
+
+I'm using [`celebrate`](https://github.com/arb/celebrate/#readme), a middleware
+build on top of [`joi`](https://github.com/sideway/joi#readme), to validate the
+request before passing it to the route callback. [See](./src/journals/journals-router.ts).
+
+## 3. Code Style Practices
+
+### 3.1 [Use eslint](https://github.com/goldbergyoni/nodebestpractices#-31-use-eslint)
+
+I'm using [Typescript ESLint](https://github.com/typescript-eslint/typescript-eslint/#readme)
+combined with [`prettier`](https://github.com/prettier/eslint-config-prettier/#readme),
+[`husky`](https://typicode.github.io/husky/#/) and [`lint-staged`](https://github.com/okonet/lint-staged#readme)
+to assure good coding style and format before commits.
