@@ -9,10 +9,20 @@ export async function up(knex: Knex): Promise<void> {
 
   await knex.raw(functions.ON_UPDATE_TIMESTAMP_FUNCTION);
 
+  await knex.schema.createTable(tables.users, (table) => {
+    table.string('id').primary();
+    table.timestamps(true, true);
+  });
+
+  await knex.raw(triggers.onUpdateTrigger(tables.users));
+
   await knex.schema.createTable(tables.journals, (table) => {
     table.string('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    table.string('user_id').notNullable().unique();
     table.string('title').notNullable();
     table.timestamps(true, true);
+
+    table.foreign('user_id').references('id').inTable(tables.users);
   });
 
   await knex.raw(triggers.onUpdateTrigger(tables.journals));
@@ -40,9 +50,10 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-  await knex.schema.dropTable(tables.inspirations);
-  await knex.schema.dropTable(tables.entries);
-  await knex.schema.dropTable(tables.journals);
+  await knex.schema.dropTableIfExists(tables.inspirations);
+  await knex.schema.dropTableIfExists(tables.entries);
+  await knex.schema.dropTableIfExists(tables.journals);
+  await knex.schema.dropTableIfExists(tables.users);
   await knex.raw(functions.DROP_ON_UPDATE_TIMESTAMP_FUNCTION);
   await knex.raw(extensions.DROP_UUID);
 }

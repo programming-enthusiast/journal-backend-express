@@ -1,6 +1,8 @@
+import { ReasonPhrases } from 'http-status-codes';
+
 export interface ErrorResponse {
   error: {
-    code: string;
+    code: ReasonPhrases;
     message: string;
   };
 }

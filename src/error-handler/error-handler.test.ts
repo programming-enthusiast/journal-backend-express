@@ -1,7 +1,9 @@
 import { CelebrateError, Joi, Segments } from 'celebrate';
-import { ErrorCodes, ResponseError } from '../errors';
 import { ErrorResponse } from './error-response';
+import { NotFoundError } from '../errors';
+import { ReasonPhrases } from 'http-status-codes';
 import { Response } from 'express';
+import { UnauthorizedError } from 'express-jwt';
 import errorHandler from '.';
 import logger from '../logger';
 
@@ -16,19 +18,15 @@ describe('error-handler', () => {
   });
 
   describe('handleError', () => {
-    test('Given an instance of ResponseError then should log the exception and send a json with the code and message from the Error, with http status from the Error', async () => {
+    test('Given an instance of NotFoundError then should log the exception and send the correct Response', async () => {
       // Arrange
-      const error = new ResponseError(
-        404,
-        ErrorCodes.ItemNotFound,
-        'Journal not found'
-      );
+      const error = new NotFoundError('Journal not found');
 
       const spy = jest.spyOn(logger, 'error');
 
       const expectedResponse: ErrorResponse = {
         error: {
-          code: error.code,
+          code: ReasonPhrases.NOT_FOUND,
           message: error.message,
         },
       };
@@ -39,11 +37,11 @@ describe('error-handler', () => {
       // Assert
       expect(spy).toBeCalledWith(error);
 
-      expect(mockResponse.status).toBeCalledWith(error.status);
+      expect(mockResponse.status).toBeCalledWith(404);
       expect(mockResponse.json).toBeCalledWith(expectedResponse);
     });
 
-    test('Given an instance of CelebrateError then should log the exception and send a json with code "invalidRequest" and the Joi validation error message', async () => {
+    test('Given an instance of CelebrateError then should log the exception and send the correct Response', async () => {
       // Arrange
       const validationError = new Joi.ValidationError(
         'journalId is required',
@@ -57,7 +55,7 @@ describe('error-handler', () => {
 
       const expectedResponse: ErrorResponse = {
         error: {
-          code: ErrorCodes.InvalidRequest,
+          code: ReasonPhrases.BAD_REQUEST,
           message: validationError.message,
         },
       };
@@ -72,7 +70,32 @@ describe('error-handler', () => {
       expect(mockResponse.json).toBeCalledWith(expectedResponse);
     });
 
-    test('Given another instance of an Error other then should log the exception and send a json with code "generalException" and message "Internal Server Error", with http status 500', async () => {
+    test('Given an instance of UnauthorizedError then should log the exception and send the correct Response', async () => {
+      // Arrange
+      const message = 'invalid signature';
+
+      const error = new UnauthorizedError('invalid_token', { message });
+
+      const spy = jest.spyOn(logger, 'error');
+
+      const expectedResponse: ErrorResponse = {
+        error: {
+          code: ReasonPhrases.UNAUTHORIZED,
+          message,
+        },
+      };
+
+      // Act
+      await errorHandler.handleError(error, mockResponse as Response);
+
+      // Assert
+      expect(spy).toBeCalledWith(error);
+
+      expect(mockResponse.status).toBeCalledWith(401);
+      expect(mockResponse.json).toBeCalledWith(expectedResponse);
+    });
+
+    test('Given another instance of an Error then should log the exception and send the correct Response', async () => {
       // Arrange
       const error = new Error('Something went wrong');
 
@@ -80,8 +103,8 @@ describe('error-handler', () => {
 
       const expectedResponse: ErrorResponse = {
         error: {
-          code: 'generalException',
-          message: 'Internal Server Error',
+          code: ReasonPhrases.INTERNAL_SERVER_ERROR,
+          message: 'Something went wrong',
         },
       };
 

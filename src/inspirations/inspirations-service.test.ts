@@ -2,13 +2,10 @@ import * as inspirationsService from './inspirations-service';
 import db, { tables } from '../infrastructure/db';
 import { Inspiration } from './inspiration';
 import { NotFoundError } from '../errors';
+import { cleanDb } from '../test-utils/clean-db';
 import { isToday } from 'date-fns';
 
 describe('inspirations-service', () => {
-  const cleanDb = async () => {
-    await db<Inspiration>(tables.inspirations).delete();
-  };
-
   beforeEach(cleanDb);
 
   afterAll(cleanDb);

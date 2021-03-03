@@ -1,19 +1,37 @@
+import * as usersService from '../users/users-service';
 import db, { tables } from '../infrastructure/db';
 import { Journal } from './journal';
 import { JournalEntry } from './journal-entry';
 import { NotFoundError } from '../errors';
 import { QueryOptions } from '../query';
 
-export const createJournal = async (title: string): Promise<Journal> => {
+export const createJournal = async (
+  userId: string,
+  title: string
+): Promise<Journal> => {
+  let user = await usersService.getUser(userId);
+
+  if (!user) {
+    user = await usersService.createUser(userId);
+  }
+
   const result = await db<Journal>(tables.journals)
-    .insert({ title })
+    .insert({ userId, title })
     .returning('*');
 
   return result[0];
 };
 
-const getJournal = async (id: string): Promise<Journal | null> => {
-  const journal = await db<Journal>(tables.journals).where('id', id).first();
+const getJournal = async (userId: string): Promise<Journal | null> => {
+  const user = await usersService.getUser(userId);
+
+  if (!user) {
+    throw new NotFoundError(`User ${userId} not found`);
+  }
+
+  const journal = await db<Journal>(tables.journals)
+    .where('userId', userId)
+    .first();
 
   if (!journal) {
     return null;
@@ -27,14 +45,14 @@ const getJournal = async (id: string): Promise<Journal | null> => {
  * current date.
  */
 export const createOrUpdateEntry = async (
-  journalId: string,
+  userId: string,
   title: string,
   text: string
 ): Promise<JournalEntry> => {
-  const journal = await getJournal(journalId);
+  const journal = await getJournal(userId);
 
   if (!journal) {
-    throw new NotFoundError(`Journal ${journalId} not found`);
+    throw new NotFoundError(`Journal not found for user ${userId}`);
   }
 
   const now = new Date();
@@ -72,16 +90,16 @@ const getEntry = async (id: string): Promise<JournalEntry | null> => {
 };
 
 export const updateEntry = async (
-  journalId: string,
+  userId: string,
   entryId: string,
   data: Partial<
-    Omit<JournalEntry, 'journalId' | 'id' | 'createdAt' | 'updatedAt'>
+    Omit<JournalEntry, 'id' | 'journalId' | 'createdAt' | 'updatedAt'>
   >
 ): Promise<JournalEntry> => {
-  const journal = await getJournal(journalId);
+  const journal = await getJournal(userId);
 
   if (!journal) {
-    throw new NotFoundError(`Journal ${journalId} not found`);
+    throw new NotFoundError(`Journal not found for user ${userId}`);
   }
 
   const entry = await getEntry(entryId);
@@ -97,16 +115,23 @@ export const updateEntry = async (
   const result = await db<JournalEntry>(tables.entries)
     .update(data)
     .where('id', entryId)
-    .andWhere('journalId', journalId)
     .returning('*');
 
   return result[0];
 };
 
 export const listEntries = async (
-  queryMethods?: QueryOptions<JournalEntry>
+  userId: string,
+  queryMethods?: QueryOptions<Omit<JournalEntry, 'journalId'>>
 ): Promise<JournalEntry[]> => {
+  const journal = await getJournal(userId);
+
+  if (!journal) {
+    throw new NotFoundError(`Journal not found for user ${userId}`);
+  }
+
   return await db<JournalEntry>(tables.entries)
+    .where({ journalId: journal.id })
     .where(queryMethods?.where ? queryMethods.where : {})
     .orderBy(queryMethods?.orderBy ? queryMethods.orderBy : []);
 };

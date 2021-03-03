@@ -10,6 +10,11 @@ interface Config {
     level: LogLevel;
   };
   db: KnexConfig;
+  auth0: {
+    jwksUri: string;
+    audience: string;
+    issuer: string;
+  };
 }
 
 // See https://en.wikipedia.org/wiki/Port_(computer_networking)
@@ -26,6 +31,10 @@ const envVarsSchema = Joi.object({
   PGUSER: Joi.string().required(),
   PGPASSWORD: Joi.string().required(),
   PGDATABASE: Joi.string().required(),
+  // https://auth0.com/docs/quickstart/backend/nodejs
+  AUTH0_JWKS_URI: Joi.string().uri().required(),
+  AUTH0_AUDIENCE: Joi.string().required(),
+  AUTH0_ISSUER: Joi.string().uri().required(),
 })
   .unknown()
   .required();
@@ -65,6 +74,11 @@ const config: Config = {
     seeds: {
       directory: `${__dirname}/infrastructure/db/seeds`,
     },
+  },
+  auth0: {
+    jwksUri: envVars.AUTH0_JWKS_URI,
+    audience: envVars.AUTH0_AUDIENCE,
+    issuer: envVars.AUTH0_ISSUER,
   },
 };
 

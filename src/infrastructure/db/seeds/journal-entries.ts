@@ -1,17 +1,23 @@
+import * as journalsService from '../../../journals/journals-service';
+import * as usersService from '../../../users/users-service';
 import db, { tables } from '..';
-import { Journal } from '../../../journals/journal';
+import { internet, lorem } from 'faker';
 import { JournalEntry } from '../../../journals/journal-entry';
 import inspirationTexts from './inspiration-texts.json';
-import { lorem } from 'faker';
 import { sample } from 'lodash';
 
 export const seed = async (): Promise<void> => {
-  for (let i = 0; i <= 3; i++) {
-    const journalInsertResult = await db<Journal>(tables.journals)
-      .insert({ title: lorem.sentence() })
-      .returning('*');
+  const userIds = [internet.email(), internet.email(), internet.email()];
 
-    const journal = journalInsertResult[0];
+  for (let i = 0; i < userIds.length; i++) {
+    const userId = userIds[i];
+
+    const user = await usersService.createUser(userId);
+
+    const journal = await journalsService.createJournal(
+      user.id,
+      lorem.sentence()
+    );
 
     for (let j = 0; j <= i; j++) {
       await db<JournalEntry>(tables.entries).insert({

@@ -1,38 +1,67 @@
 import * as journalsService from './journals-service';
+import * as usersService from '../users/users-service';
 import db, { tables } from '../infrastructure/db';
-import { endOfYesterday, isAfter, isToday } from 'date-fns';
+import { endOfYesterday, isAfter, isToday, subDays } from 'date-fns';
 import { omit, orderBy, zip } from 'lodash';
 import { Journal } from './journal';
 import { JournalEntry } from './journal-entry';
 import { NotFoundError } from '../errors';
-import { Ordering } from '../common/enums/ordering';
+import { Ordering } from '../enums/ordering';
+import { cleanDb } from '../test-utils/clean-db';
 
 describe('journals-service', () => {
-  const cleanDb = async () => {
-    await db<JournalEntry>(tables.entries).delete();
-    await db<Journal>(tables.journals).delete();
-  };
-
   beforeEach(cleanDb);
 
   afterAll(cleanDb);
 
   describe('createJournal', () => {
-    test('Should create a Journal', async () => {
+    const verifyJournal = (
+      userId: string,
+      title: string,
+      actual: Journal,
+      expected: Journal
+    ) => {
+      expect(actual).toStrictEqual({
+        ...expected,
+        userId,
+        title,
+      });
+      expect(isToday(actual.createdAt)).toBe(true);
+      expect(actual.createdAt).toEqual(expected.updatedAt);
+    };
+
+    test('Given an existing User then should create a Journal', async () => {
       // Arrange
+      const user = await usersService.createUser('existing user');
+
       const title = 'my journal';
 
       // Act
-      const result = await journalsService.createJournal(title);
+      const result = await journalsService.createJournal(user.id, title);
 
       // Assert
       const expectedResult = await db<Journal>(tables.journals)
         .where('id', result.id)
         .first();
 
-      expect(result).toStrictEqual({ ...expectedResult, title });
-      expect(isToday(result.createdAt)).toBe(true);
-      expect(result.createdAt).toEqual(result.updatedAt);
+      verifyJournal(user.id, title, result, expectedResult as Journal);
+    });
+
+    test('Given a non-existing User then should create an User and a Journal', async () => {
+      // Arrange
+      const userId = 'new user';
+
+      const title = 'my journal';
+
+      // Act
+      const result = await journalsService.createJournal(userId, title);
+
+      // Act and Assert
+      const expectedResult = await db<Journal>(tables.journals)
+        .where('id', result.id)
+        .first();
+
+      verifyJournal(userId, title, result, expectedResult as Journal);
     });
   });
 
@@ -42,7 +71,13 @@ describe('journals-service', () => {
       title: string;
       text: string;
     }> => {
-      const journal = await journalsService.createJournal('my journal');
+      const user = await usersService.createUser('my user');
+
+      const journal = await journalsService.createJournal(
+        user.id,
+        'my journal'
+      );
+
       const title = 'title';
       const text = 'text';
 
@@ -55,7 +90,7 @@ describe('journals-service', () => {
 
       // Act
       const result = await journalsService.createOrUpdateEntry(
-        journal.id,
+        journal.userId,
         title,
         text
       );
@@ -75,7 +110,7 @@ describe('journals-service', () => {
       const { journal, title, text } = await setup();
 
       const entry = await journalsService.createOrUpdateEntry(
-        journal.id,
+        journal.userId,
         title,
         text
       );
@@ -86,7 +121,7 @@ describe('journals-service', () => {
 
       // Act
       const result = await journalsService.createOrUpdateEntry(
-        journal.id,
+        journal.userId,
         newTitle,
         newText
       );
@@ -127,7 +162,7 @@ describe('journals-service', () => {
 
       // Act
       const result = await journalsService.createOrUpdateEntry(
-        journal.id,
+        journal.userId,
         title,
         text
       );
@@ -141,33 +176,45 @@ describe('journals-service', () => {
       expect(isAfter(result.updatedAt, yesterdayEntry.updatedAt)).toBe(true);
     });
 
-    test('Given an non-existing Journal id then should throw', async () => {
-      const nonExistingJournalId = 'nonExistingJournalId';
-
+    test('Given a non-existing User then should throw NotFoundError', async () => {
       await expect(
         journalsService.createOrUpdateEntry(
-          nonExistingJournalId,
+          'non existing user',
           'title',
           'text'
         )
+      ).rejects.toThrow(NotFoundError);
+    });
+
+    test('Given a non-existing Journal then should throw NotFoundError', async () => {
+      const user = await usersService.createUser('another user');
+
+      await expect(
+        journalsService.createOrUpdateEntry(user.id, 'title', 'text')
       ).rejects.toThrow(NotFoundError);
     });
   });
 
   describe('updateEntry', () => {
     const setup = async (): Promise<{
+      journal: Journal;
       entry: JournalEntry;
       update: Partial<
         Omit<JournalEntry, 'journalId' | 'id' | 'createdAt' | 'updatedAt'>
       >;
     }> => {
-      const journal = await journalsService.createJournal('my journal');
+      const user = await usersService.createUser('my user');
+
+      const journal = await journalsService.createJournal(
+        user.id,
+        'my journal'
+      );
 
       const title = 'title';
       const text = 'text';
 
       const entry = await journalsService.createOrUpdateEntry(
-        journal.id,
+        journal.userId,
         title,
         text
       );
@@ -177,16 +224,16 @@ describe('journals-service', () => {
         text: 'new text',
       };
 
-      return { entry, update };
+      return { journal, entry, update };
     };
 
     test('Should update an existing Entry', async () => {
       // Arrange
-      const { entry, update } = await setup();
+      const { journal, entry, update } = await setup();
 
       // Act
       const result = await journalsService.updateEntry(
-        entry.journalId,
+        journal.userId,
         entry.id,
         update
       );
@@ -209,11 +256,11 @@ describe('journals-service', () => {
 
     test('Given empty update then should return existing Entry', async () => {
       // Arrange
-      const { entry } = await setup();
+      const { journal, entry } = await setup();
 
       // Act
       const result = await journalsService.updateEntry(
-        entry.journalId,
+        journal.userId,
         entry.id,
         {}
       );
@@ -222,146 +269,131 @@ describe('journals-service', () => {
       expect(result).toStrictEqual(entry);
     });
 
-    test('Given a non-existing Journal id then should throw', async () => {
+    test('Given a non-existing User then should throw NotFoundError', async () => {
       // Arrange
       const { entry, update } = await setup();
-
-      const nonExistingJournalId = 'nonExistingJournalId';
 
       // Act and Assert
       await expect(
-        journalsService.updateEntry(nonExistingJournalId, entry.id, update)
+        journalsService.updateEntry('non existing user', entry.id, update)
       ).rejects.toThrow(NotFoundError);
     });
 
-    test('Given a non-existing Entry id then should throw', async () => {
+    test('Given a non-existing Journal then should throw NotFoundError', async () => {
       // Arrange
       const { entry, update } = await setup();
+
+      const user = await usersService.createUser('another user');
+
+      // Act and Assert
+      await expect(
+        journalsService.updateEntry(user.id, entry.id, update)
+      ).rejects.toThrow(NotFoundError);
+    });
+
+    test('Given a non-existing Entry then should throw NotFoundError', async () => {
+      // Arrange
+      const { journal, update } = await setup();
 
       const nonExistingEntryId = 'nonExistingEntryId';
 
       // Act and Assert
       await expect(
-        journalsService.updateEntry(entry.journalId, nonExistingEntryId, update)
+        journalsService.updateEntry(journal.userId, nonExistingEntryId, update)
       ).rejects.toThrow(NotFoundError);
     });
   });
 
   describe('listEntries', () => {
     const setup = async (): Promise<{
-      journalOneEntries: JournalEntry[];
-      journalTwoEntries: JournalEntry[];
+      journal: Journal;
+      entries: JournalEntry[];
     }> => {
-      const journalOneEntries: JournalEntry[] = [];
-      const journalTwoEntries: JournalEntry[] = [];
+      const user = await usersService.createUser('my user');
 
-      const entriesDataOne: Partial<
-        Omit<JournalEntry, 'journalId' | 'id' | 'createdAt' | 'updatedAt'>
-      >[] = [
+      const journal = await journalsService.createJournal(
+        user.id,
+        'my journal'
+      );
+
+      const entries: JournalEntry[] = [];
+
+      const entriesData: Partial<Omit<JournalEntry, 'journalId' | 'id'>>[] = [
         {
           title: 'title',
           text: 'text',
+          createdAt: subDays(new Date(), 2),
+          updatedAt: subDays(new Date(), 2),
         },
-      ];
-
-      const entriesDataTwo: Partial<
-        Omit<JournalEntry, 'journalId' | 'id' | 'createdAt' | 'updatedAt'>
-      >[] = [
         {
           title: 'another title',
           text: 'another text',
+          createdAt: subDays(new Date(), 1),
+          updatedAt: subDays(new Date(), 1),
+        },
+        {
+          title: 'yet another title',
+          text: 'yet another text',
         },
       ];
 
-      const journalOne = await journalsService.createJournal('journal one');
+      for (const datum of entriesData) {
+        const result = await db<JournalEntry>(tables.entries)
+          .insert({
+            journalId: journal.id,
+            title: datum.title,
+            text: datum.text,
+            createdAt: datum.createdAt,
+            updatedAt: datum.updatedAt,
+          })
+          .returning('*');
 
-      const journalTwo = await journalsService.createJournal('journal two');
-
-      for (const datum of entriesDataOne) {
-        journalOneEntries.push(
-          await journalsService.createOrUpdateEntry(
-            journalOne.id,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            datum.title!,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            datum.text!
-          )
-        );
+        entries.push(result[0]);
       }
 
-      for (const datum of entriesDataTwo) {
-        journalTwoEntries.push(
-          await journalsService.createOrUpdateEntry(
-            journalTwo.id,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            datum.title!,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            datum.text!
-          )
-        );
-      }
-
-      return { journalOneEntries, journalTwoEntries };
+      return { journal, entries };
     };
 
-    test('Given no queryMethods then should return all entries', async () => {
+    test('Given no queryMethods then should return all entries from a Journal', async () => {
       // Arrange
-      const { journalOneEntries, journalTwoEntries } = await setup();
+      const { journal, entries } = await setup();
 
       // Act
-      const result = await journalsService.listEntries();
+      const result = await journalsService.listEntries(journal.userId);
 
       // Assert
-      expect(result).toStrictEqual([
-        ...journalOneEntries,
-        ...journalTwoEntries,
-      ]);
+      expect(result).toStrictEqual(entries);
     });
 
-    test('Given queryMethods where then should return the corresponsing entries', async () => {
+    test("Given 'where' query option then should return the corresponsing entries", async () => {
       // Arrange
-      const { journalOneEntries } = await setup();
+      const { journal, entries } = await setup();
+
+      const title = 'yet another title';
+
+      const expectedResult = entries.filter((entry) => entry.title === title);
 
       // Act
-      const result = await journalsService.listEntries({
+      const result = await journalsService.listEntries(journal.userId, {
         where: {
-          journalId: journalOneEntries[0].journalId,
+          title,
         },
       });
 
       // Assert
-      expect(result).toStrictEqual(journalOneEntries);
-    });
-
-    test('Given queryMethods where then should return the corresponsing entries', async () => {
-      // Arrange
-      const { journalOneEntries } = await setup();
-
-      // Act
-      const result = await journalsService.listEntries({
-        where: {
-          journalId: journalOneEntries[0].journalId,
-        },
-      });
-
-      // Assert
-      expect(result).toStrictEqual(journalOneEntries);
+      expect(result).toStrictEqual(expectedResult);
     });
 
     test.each(['asc' as Ordering, 'desc' as Ordering])(
       'Given queryMethods orderBy then should return the corresponsing entries ordered by %p',
       async (order: Ordering) => {
         // Arrange
-        const { journalOneEntries, journalTwoEntries } = await setup();
+        const { journal, entries } = await setup();
 
-        const expectedResult = orderBy(
-          [...journalOneEntries, ...journalTwoEntries],
-          ['createdAt'],
-          [order]
-        );
+        const expectedResult = orderBy(entries, ['createdAt'], [order]);
 
         // Act
-        const result = await journalsService.listEntries({
+        const result = await journalsService.listEntries(journal.userId, {
           orderBy: [{ column: 'createdAt', order }],
         });
 
@@ -371,5 +403,22 @@ describe('journals-service', () => {
         }
       }
     );
+
+    test('Given a non-existing User then should throw NotFoundError', async () => {
+      // Act and Assert
+      await expect(
+        journalsService.listEntries('non existing user')
+      ).rejects.toThrow(NotFoundError);
+    });
+
+    test('Given a non-existing Journal then should throw NotFoundError', async () => {
+      // Arrange
+      const user = await usersService.createUser('my user');
+
+      // Act and Assert
+      await expect(journalsService.listEntries(user.id)).rejects.toThrow(
+        NotFoundError
+      );
+    });
   });
 });

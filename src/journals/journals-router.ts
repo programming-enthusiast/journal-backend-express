@@ -1,9 +1,7 @@
 import * as journalsService from './journals-service';
-import { ErrorCodes, NotFoundError, ResponseError } from '../errors';
 import { Joi, Segments, celebrate } from 'celebrate';
 import express, { NextFunction, Request, Response } from 'express';
 import { orderByRegex, toOrderBy } from '../query/options/order-by';
-import { JournalEntry } from './journal-entry';
 import { StatusCodes } from 'http-status-codes';
 
 const router = express.Router();
@@ -19,7 +17,9 @@ router.post(
     try {
       const { title } = req.body;
 
-      const journal = await journalsService.createJournal(title);
+      const userId = req.user.sub;
+
+      const journal = await journalsService.createJournal(userId, title);
 
       res.status(StatusCodes.CREATED).json(journal);
     } catch (err) {
@@ -29,7 +29,7 @@ router.post(
 );
 
 router.post(
-  '/:journalId/entries',
+  '/entries',
   celebrate({
     [Segments.BODY]: Joi.object().keys({
       title: Joi.string().required(),
@@ -38,28 +38,15 @@ router.post(
   }),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { journalId } = req.params;
-
       const { title, text } = req.body;
 
-      let entry: JournalEntry;
+      const userId = req.user.sub;
 
-      try {
-        entry = await journalsService.createOrUpdateEntry(
-          journalId,
-          title,
-          text
-        );
-      } catch (err) {
-        if (err instanceof NotFoundError) {
-          throw new ResponseError(
-            StatusCodes.NOT_FOUND,
-            ErrorCodes.ItemNotFound,
-            err.message
-          );
-        }
-        throw err;
-      }
+      const entry = await journalsService.createOrUpdateEntry(
+        userId,
+        title,
+        text
+      );
 
       res.status(StatusCodes.CREATED).send(entry);
     } catch (err) {
@@ -69,7 +56,7 @@ router.post(
 );
 
 router.patch(
-  '/:journalId/entries/:entryId',
+  '/entries/:entryId',
   celebrate({
     [Segments.BODY]: Joi.object().keys({
       title: Joi.string(),
@@ -78,23 +65,15 @@ router.patch(
   }),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { journalId, entryId } = req.params;
+      const { entryId } = req.params;
 
-      let entry: JournalEntry;
+      const userId = req.user.sub;
 
-      try {
-        entry = await journalsService.updateEntry(journalId, entryId, req.body);
-      } catch (err) {
-        if (err instanceof NotFoundError) {
-          throw new ResponseError(
-            StatusCodes.NOT_FOUND,
-            ErrorCodes.ItemNotFound,
-            err.message
-          );
-        }
-
-        throw err;
-      }
+      const entry = await journalsService.updateEntry(
+        userId,
+        entryId,
+        req.body
+      );
 
       res.send(entry);
     } catch (err) {
@@ -104,7 +83,7 @@ router.patch(
 );
 
 router.get(
-  '/:journalId/entries',
+  '/entries',
   celebrate({
     [Segments.QUERY]: {
       orderBy: Joi.string().regex(orderByRegex),
@@ -116,12 +95,11 @@ router.get(
   }),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { journalId } = req.params;
-
       const { orderBy } = req.query;
 
-      const entries = await journalsService.listEntries({
-        where: { journalId },
+      const userId = req.user.sub;
+
+      const entries = await journalsService.listEntries(userId, {
         orderBy: orderBy ? toOrderBy(orderBy as string) : [],
       });
 

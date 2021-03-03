@@ -1,11 +1,25 @@
 import * as inspirationsService from './inspirations-service';
-import { ErrorCodes, NotFoundError } from '../errors';
+import { getToken, jwks } from '../test-utils/jwt';
 import request, { Response } from 'supertest';
 import { Inspiration } from './inspiration';
+import { NotFoundError } from '../errors';
 import { ReasonPhrases } from 'http-status-codes';
 import app from '../app';
+import config from '../config';
+import nock from 'nock';
 
 describe('inspirations-router', () => {
+  const userId = 'my admin id';
+
+  const authorization = `Bearer ${getToken(userId)}`;
+
+  beforeEach(() => {
+    nock(config.auth0.issuer)
+      .persist()
+      .get('/.well-known/jwks.json')
+      .reply(200, jwks);
+  });
+
   describe('/api/v1/inspirations', () => {
     const baseUrl = '/api/v1/inspirations';
 
@@ -26,6 +40,7 @@ describe('inspirations-router', () => {
         // Act and Assert
         return request(app)
           .post(baseUrl)
+          .set('Authorization', authorization)
           .expect(201)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
@@ -34,9 +49,6 @@ describe('inspirations-router', () => {
               createdAt: inspiration.createdAt.toISOString(),
               updatedAt: inspiration.updatedAt.toISOString(),
             });
-          })
-          .catch((err) => {
-            throw err;
           });
       });
 
@@ -51,18 +63,16 @@ describe('inspirations-router', () => {
         // Act and Assert
         return request(app)
           .post(baseUrl)
+          .set('Authorization', authorization)
           .expect(500)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
             expect(response.body).toStrictEqual({
               error: {
-                code: ErrorCodes.GeneralException,
-                message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+                code: ReasonPhrases.INTERNAL_SERVER_ERROR,
+                message: 'Something went wrong',
               },
             });
-          })
-          .catch((err) => {
-            throw err;
           });
       });
     });
@@ -92,6 +102,7 @@ describe('inspirations-router', () => {
         // Act and Assert
         return request(app)
           .get(baseUrl)
+          .set('Authorization', authorization)
           .expect(200)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
@@ -109,9 +120,6 @@ describe('inspirations-router', () => {
                 updatedAt: inspirations[1].updatedAt.toISOString(),
               },
             ]);
-          })
-          .catch((err) => {
-            throw err;
           });
       });
 
@@ -126,18 +134,16 @@ describe('inspirations-router', () => {
         // Act and Assert
         return request(app)
           .get(baseUrl)
+          .set('Authorization', authorization)
           .expect(500)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
             expect(response.body).toStrictEqual({
               error: {
-                code: ErrorCodes.GeneralException,
-                message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+                code: ReasonPhrases.INTERNAL_SERVER_ERROR,
+                message: 'Something went wrong',
               },
             });
-          })
-          .catch((err) => {
-            throw err;
           });
       });
     });
@@ -156,12 +162,10 @@ describe('inspirations-router', () => {
         // Act and Assert
         return request(app)
           .delete(url)
+          .set('Authorization', authorization)
           .expect(204)
           .then((response: Response) => {
             expect(response.body).toStrictEqual({});
-          })
-          .catch((err) => {
-            throw err;
           });
       });
 
@@ -178,18 +182,16 @@ describe('inspirations-router', () => {
         // Act and Assert
         return request(app)
           .delete(url)
+          .set('Authorization', authorization)
           .expect(404)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
             expect(response.body).toStrictEqual({
               error: {
-                code: ErrorCodes.ItemNotFound,
+                code: ReasonPhrases.NOT_FOUND,
                 message,
               },
             });
-          })
-          .catch((err) => {
-            throw err;
           });
       });
 
@@ -204,18 +206,16 @@ describe('inspirations-router', () => {
         // Act and Assert
         return request(app)
           .delete(url)
+          .set('Authorization', authorization)
           .expect(500)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
             expect(response.body).toStrictEqual({
               error: {
-                code: ErrorCodes.GeneralException,
-                message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+                code: ReasonPhrases.INTERNAL_SERVER_ERROR,
+                message: 'Something went wrong',
               },
             });
-          })
-          .catch((err) => {
-            throw err;
           });
       });
     });

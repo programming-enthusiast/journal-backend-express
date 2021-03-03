@@ -1,5 +1,4 @@
 import * as inspirationsService from './inspirations-service';
-import { ErrorCodes, NotFoundError, ResponseError } from '../errors';
 import express, { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
@@ -37,15 +36,6 @@ router.delete(
 
       res.status(StatusCodes.NO_CONTENT).send();
     } catch (err) {
-      if (err instanceof NotFoundError) {
-        next(
-          new ResponseError(
-            StatusCodes.NOT_FOUND,
-            ErrorCodes.ItemNotFound,
-            err.message
-          )
-        );
-      }
       next(err);
     }
   }

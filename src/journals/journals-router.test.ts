@@ -1,14 +1,32 @@
 import * as journalsService from './journals-service';
-import { ErrorCodes, NotFoundError } from '../errors';
+import db, { tables } from '../infrastructure/db';
+import { getToken, jwks } from '../test-utils/jwt';
+import { isAfter, subDays } from 'date-fns';
+import { omit, orderBy } from 'lodash';
 import request, { Response } from 'supertest';
-import { Journal } from './journal';
 import { JournalEntry } from './journal-entry';
+import { NotFoundError } from '../errors';
 import { ReasonPhrases } from 'http-status-codes';
 import app from '../app';
-import { omit } from 'lodash';
+import { cleanDb } from '../test-utils/clean-db';
+import config from '../config';
+import nock from 'nock';
 import { orderByRegex } from '../query/options/order-by';
 
 describe('journals-router', () => {
+  const userId = 'my user';
+
+  const authorization = `Bearer ${getToken(userId)}`;
+
+  beforeEach(() => {
+    nock(config.auth0.issuer)
+      .persist()
+      .get('/.well-known/jwks.json')
+      .reply(200, jwks);
+  });
+
+  afterEach(cleanDb);
+
   describe('/api/v1/journals', () => {
     const baseUrl = '/api/v1/journals';
 
@@ -19,32 +37,18 @@ describe('journals-router', () => {
           title: 'my journal',
         };
 
-        const journal: Journal = {
-          id: 'id',
-          title: requestBody.title,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-
-        jest
-          .spyOn(journalsService, 'createJournal')
-          .mockResolvedValueOnce(journal);
-
         // Act and Assert
         return request(app)
           .post(baseUrl)
+          .set('Authorization', authorization)
           .send(requestBody)
           .expect(201)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
-            expect(response.body).toStrictEqual({
-              ...journal,
-              createdAt: journal.createdAt.toISOString(),
-              updatedAt: journal.updatedAt.toISOString(),
-            });
-          })
-          .catch((err) => {
-            throw err;
+            expect(response.body.id).toBeDefined();
+            expect(response.body.userId).toBe(userId);
+            expect(Date.parse(response.body.createdAt)).toBeTruthy();
+            expect(Date.parse(response.body.updatedAt)).toBeTruthy();
           });
       });
 
@@ -52,18 +56,16 @@ describe('journals-router', () => {
         // Act and Assert
         return request(app)
           .post(baseUrl)
+          .set('Authorization', authorization)
           .expect(400)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
             expect(response.body).toStrictEqual({
               error: {
-                code: ErrorCodes.InvalidRequest,
+                code: ReasonPhrases.BAD_REQUEST,
                 message: '"title" is required',
               },
             });
-          })
-          .catch((err) => {
-            throw err;
           });
       });
 
@@ -82,80 +84,68 @@ describe('journals-router', () => {
         // Act and Assert
         return request(app)
           .post(baseUrl)
+          .set('Authorization', authorization)
           .send(requestBody)
           .expect(500)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
             expect(response.body).toStrictEqual({
               error: {
-                code: ErrorCodes.GeneralException,
-                message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+                code: ReasonPhrases.INTERNAL_SERVER_ERROR,
+                message: 'Something went wrong',
               },
             });
-          })
-          .catch((err) => {
-            throw err;
           });
       });
     });
 
-    describe('POST /:journalId/entries', () => {
+    describe('POST /entries', () => {
+      const url = `${baseUrl}/entries`;
+
       const requestBody = {
-        title: 'title',
-        text: 'text',
+        title: "Solve a Rubik's cube",
+        text:
+          "Today I went to the internet to search how to solve a Rubik's cube\n. It was fun!",
       };
 
-      const entry: JournalEntry = {
-        id: 'id',
-        journalId: 'journalId',
-        ...requestBody,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      const url = `${baseUrl}/${entry.journalId}/entries`;
-
-      test('Should create a Journal Entry', () => {
+      test('Should create a Journal Entry', async () => {
         // Arrange
-        jest
-          .spyOn(journalsService, 'createOrUpdateEntry')
-          .mockResolvedValueOnce(entry);
+        const journal = await journalsService.createJournal(
+          userId,
+          'a journal'
+        );
 
         // Act and Assert
         return request(app)
           .post(url)
+          .set('Authorization', authorization)
           .send(requestBody)
           .expect(201)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
-            expect(response.body).toStrictEqual({
-              ...entry,
-              createdAt: entry.createdAt.toISOString(),
-              updatedAt: entry.updatedAt.toISOString(),
-            });
-          })
-          .catch((err) => {
-            throw err;
+            expect(response.body.id).toBeDefined();
+            expect(response.body.journalId).toBe(journal.id);
+            expect(Date.parse(response.body.createdAt)).toBeTruthy();
+            expect(Date.parse(response.body.updatedAt)).toBeTruthy();
           });
       });
 
       test('Given title is undefined then should return 400', () => {
         // Act and Assert
+
         return request(app)
           .post(url)
+          .set('Authorization', authorization)
           .send(omit(requestBody, 'title'))
           .expect(400)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
             expect(response.body).toStrictEqual({
               error: {
-                code: ErrorCodes.InvalidRequest,
+                code: ReasonPhrases.BAD_REQUEST,
                 message: '"title" is required',
               },
             });
-          })
-          .catch((err) => {
-            throw err;
           });
       });
 
@@ -163,19 +153,17 @@ describe('journals-router', () => {
         // Act and Assert
         return request(app)
           .post(url)
+          .set('Authorization', authorization)
           .send(omit(requestBody, 'text'))
           .expect(400)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
             expect(response.body).toStrictEqual({
               error: {
-                code: ErrorCodes.InvalidRequest,
+                code: ReasonPhrases.BAD_REQUEST,
                 message: '"text" is required',
               },
             });
-          })
-          .catch((err) => {
-            throw err;
           });
       });
 
@@ -192,19 +180,17 @@ describe('journals-router', () => {
         // Act and Assert
         return request(app)
           .post(url)
+          .set('Authorization', authorization)
           .send(requestBody)
           .expect(404)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
             expect(response.body).toStrictEqual({
               error: {
-                code: ErrorCodes.ItemNotFound,
+                code: ReasonPhrases.NOT_FOUND,
                 message,
               },
             });
-          })
-          .catch((err) => {
-            throw err;
           });
       });
 
@@ -219,58 +205,71 @@ describe('journals-router', () => {
         // Act and Assert
         return request(app)
           .post(url)
+          .set('Authorization', authorization)
           .send(requestBody)
           .expect(500)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
             expect(response.body).toStrictEqual({
               error: {
-                code: ErrorCodes.GeneralException,
-                message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+                code: ReasonPhrases.INTERNAL_SERVER_ERROR,
+                message: 'Something went wrong',
               },
             });
-          })
-          .catch((err) => {
-            throw err;
           });
       });
     });
 
-    describe('PATCH /:journalId/entries/:entryId', () => {
+    describe('PATCH /entries/:entryId', () => {
       const requestBody = {
-        title: 'title',
-        text: 'text',
+        title: 'my updated title',
+        text: 'my updated text',
       };
 
-      const entry: JournalEntry = {
-        id: 'id',
-        journalId: 'journalId',
-        ...requestBody,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+      let entry: JournalEntry;
+      let url: string;
+
+      const setup = async (): Promise<JournalEntry> => {
+        await journalsService.createJournal(userId, 'my journal');
+
+        const entry = await journalsService.createOrUpdateEntry(
+          userId,
+          'my title',
+          'my text'
+        );
+
+        return entry;
       };
 
-      const url = `${baseUrl}/${entry.journalId}/entries/${entry.id}`;
+      beforeAll(async () => {
+        entry = await setup();
+        url = `${baseUrl}/entries/${entry.id}`;
+      });
 
       test('Should update a Journal Entry', () => {
-        // Arrange
-        jest.spyOn(journalsService, 'updateEntry').mockResolvedValueOnce(entry);
-
         // Act and Assert
         return request(app)
           .patch(url)
+          .set('Authorization', authorization)
           .send(requestBody)
           .expect(200)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
-            expect(response.body).toStrictEqual({
-              ...entry,
-              createdAt: entry.createdAt.toISOString(),
-              updatedAt: entry.updatedAt.toISOString(),
-            });
-          })
-          .catch((err) => {
-            throw err;
+            expect(omit(response.body, 'updatedAt')).toStrictEqual(
+              omit(
+                {
+                  ...entry,
+                  title: requestBody.title,
+                  text: requestBody.text,
+                  createdAt: entry.createdAt.toISOString(),
+                },
+                'updatedAt'
+              )
+            );
+
+            expect(
+              isAfter(new Date(response.body.updatedAt), entry.updatedAt)
+            ).toBe(true);
           });
       });
 
@@ -280,78 +279,62 @@ describe('journals-router', () => {
           // Act and Assert
           return request(app)
             .patch(url)
+            .set('Authorization', authorization)
             .send({ title })
             .expect(400)
             .expect('Content-Type', /json/)
             .then((response: Response) => {
               expect(response.body).toStrictEqual({
                 error: {
-                  code: ErrorCodes.InvalidRequest,
+                  code: ReasonPhrases.BAD_REQUEST,
                   message: '"title" must be a string',
                 },
               });
-            })
-            .catch((err) => {
-              throw err;
             });
         }
       );
 
-      test('Given a non-existing Journal id then should return 404', () => {
-        // Arrange
-        const message = 'Journal not found';
+      test.each([null, {}, []])(
+        'Given text is not a string then should return 400',
+        (text) => {
+          // Act and Assert
+          return request(app)
+            .patch(url)
+            .set('Authorization', authorization)
+            .send({ text })
+            .expect(400)
+            .expect('Content-Type', /json/)
+            .then((response: Response) => {
+              expect(response.body).toStrictEqual({
+                error: {
+                  code: ReasonPhrases.BAD_REQUEST,
+                  message: '"text" must be a string',
+                },
+              });
+            });
+        }
+      );
 
-        jest
-          .spyOn(journalsService, 'updateEntry')
-          .mockImplementationOnce(() => {
-            throw new NotFoundError(message);
-          });
+      test('Given a non-existing User then should return 404', () => {
+        // Arrange
+        const userId = 'non-existing-user';
+
+        const authorization = `Bearer ${getToken(userId)}`;
 
         // Act and Assert
         return request(app)
           .patch(url)
+          .set('Authorization', authorization)
           .send(requestBody)
           .expect(404)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
             expect(response.body).toStrictEqual({
               error: {
-                code: ErrorCodes.ItemNotFound,
-                message,
+                code: ReasonPhrases.NOT_FOUND,
+                message: `User ${userId} not found`,
               },
             });
-          })
-          .catch((err) => {
-            throw err;
-          });
-      });
-
-      test('Given a non-existing Journal Entry id then should return 404', () => {
-        // Arrange
-        const message = 'Journal Entry not found';
-
-        jest
-          .spyOn(journalsService, 'updateEntry')
-          .mockImplementationOnce(() => {
-            throw new NotFoundError(message);
-          });
-
-        // Act and Assert
-        return request(app)
-          .patch(url)
-          .send(requestBody)
-          .expect(404)
-          .expect('Content-Type', /json/)
-          .then((response: Response) => {
-            expect(response.body).toStrictEqual({
-              error: {
-                code: ErrorCodes.ItemNotFound,
-                message,
-              },
-            });
-          })
-          .catch((err) => {
-            throw err;
           });
       });
 
@@ -366,114 +349,109 @@ describe('journals-router', () => {
         // Act and Assert
         return request(app)
           .patch(url)
+          .set('Authorization', authorization)
           .send(requestBody)
           .expect(500)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
             expect(response.body).toStrictEqual({
               error: {
-                code: ErrorCodes.GeneralException,
-                message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+                code: ReasonPhrases.INTERNAL_SERVER_ERROR,
+                message: 'Something went wrong',
               },
             });
-          })
-          .catch((err) => {
-            throw err;
           });
       });
     });
 
-    describe('GET /:journalId/entries', () => {
-      const journalId = 'journalId';
+    describe('GET /entries', () => {
+      const url = `${baseUrl}/entries`;
 
-      const entries: JournalEntry[] = [
-        {
-          id: 'id',
-          journalId,
-          title: 'title',
-          text: 'text',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: 'another id',
-          journalId,
-          title: 'another title',
-          text: 'another text',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ];
+      let entries: JournalEntry[];
 
-      const url = `${baseUrl}/${journalId}/entries`;
+      const setup = async (): Promise<JournalEntry[]> => {
+        const journal = await journalsService.createJournal(
+          userId,
+          'my journal'
+        );
 
-      test('Should get a list of Entries by Journal id', () => {
-        // Arrange
-        jest
-          .spyOn(journalsService, 'listEntries')
-          .mockResolvedValueOnce(entries);
+        const entries: JournalEntry[] = [
+          {
+            id: 'id',
+            journalId: journal.id,
+            title: 'title',
+            text: 'text',
+            createdAt: subDays(new Date(), 14),
+            updatedAt: subDays(new Date(), 14),
+          },
+          {
+            id: 'another id',
+            journalId: journal.id,
+            title: 'another title',
+            text: 'another text',
+            createdAt: subDays(new Date(), 7),
+            updatedAt: subDays(new Date(), 7),
+          },
+          {
+            id: 'yet another id',
+            journalId: journal.id,
+            title: 'yet another title',
+            text: 'yet another text',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ];
 
+        for (const entry of entries) {
+          await db<JournalEntry>(tables.entries).insert(entry);
+        }
+
+        return entries;
+      };
+
+      beforeEach(async () => {
+        entries = await setup();
+      });
+
+      test("Should get a list of the User's Entries", () => {
         // Act and Assert
         return request(app)
           .get(url)
+          .set('Authorization', authorization)
           .expect(200)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
-            expect(journalsService.listEntries).toBeCalledWith({
-              where: {
-                journalId,
-              },
-              orderBy: [],
-            });
-
-            expect(response.body).toStrictEqual([
-              {
-                ...entries[0],
-                createdAt: entries[0].createdAt.toISOString(),
-                updatedAt: entries[0].updatedAt.toISOString(),
-              },
-              {
-                ...entries[1],
-                createdAt: entries[1].createdAt.toISOString(),
-                updatedAt: entries[1].updatedAt.toISOString(),
-              },
-            ]);
-          })
-          .catch((err) => {
-            throw err;
+            expect(response.body).toStrictEqual(
+              entries.map((entry) => {
+                return {
+                  ...entry,
+                  createdAt: entry.createdAt.toISOString(),
+                  updatedAt: entry.updatedAt.toISOString(),
+                };
+              })
+            );
           });
       });
 
       test('Given optional orderBy query param then should return ordered list', () => {
-        // Arrange
-        jest
-          .spyOn(journalsService, 'listEntries')
-          .mockResolvedValueOnce(entries);
-
         // Act and Assert
         return request(app)
-          .get(`${url}?orderBy=created desc/title`)
+          .get(`${url}?orderBy=created_at desc/title`)
+          .set('Authorization', authorization)
           .expect(200)
           .expect('Content-Type', /json/)
-          .then(() => {
-            expect(journalsService.listEntries).toBeCalledWith({
-              where: {
-                journalId,
-              },
-              orderBy: [
-                {
-                  column: 'created',
-                  order: 'desc',
-                },
-                {
-                  column: 'title',
-                  order: 'asc',
-                },
-              ],
-            });
-          })
-          .catch((err) => {
-            throw err;
+          .then((response: Response) => {
+            expect(response.body).toStrictEqual(
+              orderBy(entries, ['createdAt', 'title'], ['desc', 'asc']).map(
+                (entry) => {
+                  return {
+                    ...entry,
+                    createdAt: entry.createdAt.toISOString(),
+                    updatedAt: entry.updatedAt.toISOString(),
+                  };
+                }
+              )
+            );
           });
       });
 
@@ -483,18 +461,16 @@ describe('journals-router', () => {
           // Act and Assert
           return request(app)
             .get(`${url}?${invalidOrderBy}`)
+            .set('Authorization', authorization)
             .expect(400)
             .expect('Content-Type', /json/)
             .then((response: Response) => {
               expect(response.body).toStrictEqual({
                 error: {
-                  code: ErrorCodes.InvalidRequest,
+                  code: ReasonPhrases.BAD_REQUEST,
                   message: '"orderBy" must be a string',
                 },
               });
-            })
-            .catch((err) => {
-              throw err;
             });
         }
       );
@@ -511,21 +487,41 @@ describe('journals-router', () => {
           // Act and Assert
           return request(app)
             .get(`${url}?orderBy=${invalidOrderBy}`)
+            .set('Authorization', authorization)
             .expect(400)
             .expect('Content-Type', /json/)
             .then((response: Response) => {
               expect(response.body).toStrictEqual({
                 error: {
-                  code: ErrorCodes.InvalidRequest,
+                  code: ReasonPhrases.BAD_REQUEST,
                   message: `"orderBy" with value "${invalidOrderBy}" fails to match the required pattern: ${orderByRegex}`,
                 },
               });
-            })
-            .catch((err) => {
-              throw err;
             });
         }
       );
+
+      test('Given a non-existing User then should return 404', () => {
+        // Arrange
+        const userId = 'non-existing-user';
+
+        const authorization = `Bearer ${getToken(userId)}`;
+
+        // Act and Assert
+        return request(app)
+          .get(url)
+          .set('Authorization', authorization)
+          .expect(404)
+          .expect('Content-Type', /json/)
+          .then((response: Response) => {
+            expect(response.body).toStrictEqual({
+              error: {
+                code: ReasonPhrases.NOT_FOUND,
+                message: `User ${userId} not found`,
+              },
+            });
+          });
+      });
 
       test('Given failure then should return 500', () => {
         // Arrange
@@ -538,18 +534,16 @@ describe('journals-router', () => {
         // Act and Assert
         return request(app)
           .get(url)
+          .set('Authorization', authorization)
           .expect(500)
           .expect('Content-Type', /json/)
           .then((response: Response) => {
             expect(response.body).toStrictEqual({
               error: {
-                code: ErrorCodes.GeneralException,
-                message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+                code: ReasonPhrases.INTERNAL_SERVER_ERROR,
+                message: 'Something went wrong',
               },
             });
-          })
-          .catch((err) => {
-            throw err;
           });
       });
     });
