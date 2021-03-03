@@ -3,7 +3,7 @@
 An [Express](https://expressjs.com) application showcasing best practices. A
 great list of these practices can be found [here](https://github.com/goldbergyoni/nodebestpractices).
 
-# Features
+# Best Practices
 
 ## 1. Project Structure Practices
 
