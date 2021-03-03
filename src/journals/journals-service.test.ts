@@ -1,13 +1,13 @@
 import * as journalsService from './journals-service';
-import * as usersService from '../users/users-service';
-import db, { tables } from '../infrastructure/db';
+import { db, tables } from '../infrastructure/db';
 import { endOfYesterday, isAfter, isToday, subDays } from 'date-fns';
 import { omit, orderBy, zip } from 'lodash';
 import { Journal } from './journal';
 import { JournalEntry } from './journal-entry';
 import { NotFoundError } from '../errors';
-import { Ordering } from '../enums/ordering';
+import { Ordering } from '../enums';
 import { cleanDb } from '../test-utils/clean-db';
+import { usersService } from '../users';
 
 describe('journals-service', () => {
   beforeEach(cleanDb);

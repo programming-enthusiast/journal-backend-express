@@ -1,12 +1,12 @@
 import * as journalsService from './journals-service';
 import { Joi, Segments, celebrate } from 'celebrate';
 import express, { NextFunction, Request, Response } from 'express';
-import { orderByRegex, toOrderBy } from '../query/options/order-by';
+import { orderByRegex, toOrderBy } from '../query/order-by';
 import { StatusCodes } from 'http-status-codes';
 
-const router = express.Router();
+export const journalsRouter = express.Router();
 
-router.post(
+journalsRouter.post(
   '/',
   celebrate({
     [Segments.BODY]: Joi.object().keys({
@@ -28,7 +28,7 @@ router.post(
   }
 );
 
-router.post(
+journalsRouter.post(
   '/entries',
   celebrate({
     [Segments.BODY]: Joi.object().keys({
@@ -55,7 +55,7 @@ router.post(
   }
 );
 
-router.patch(
+journalsRouter.patch(
   '/entries/:entryId',
   celebrate({
     [Segments.BODY]: Joi.object().keys({
@@ -82,7 +82,7 @@ router.patch(
   }
 );
 
-router.get(
+journalsRouter.get(
   '/entries',
   celebrate({
     [Segments.QUERY]: {
@@ -109,5 +109,3 @@ router.get(
     }
   }
 );
-
-export default router;

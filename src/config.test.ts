@@ -14,7 +14,7 @@ describe('config', () => {
     test('Given environment variable NODE_ENV not defined then should return development', () => {
       delete process.env.NODE_ENV;
 
-      const config = require('./config').default;
+      const { config } = require('./config');
 
       expect(config.env).toBe('development');
     });
@@ -24,7 +24,7 @@ describe('config', () => {
       (env) => {
         process.env.NODE_ENV = env;
 
-        const config = require('./config').default;
+        const { config } = require('./config');
 
         expect(config.env).toBe(env);
       }
@@ -45,14 +45,14 @@ describe('config', () => {
     test("Given environment variable PORT defined then should return it's value", () => {
       process.env.PORT = '8080';
 
-      const config = require('./config').default;
+      const { config } = require('./config');
 
       expect(config.port).toBe(8080);
     });
     test('Given environment variable PORT not defined then should return 3000', () => {
       delete process.env.PORT;
 
-      const config = require('./config').default;
+      const { config } = require('./config');
 
       expect(config.port).toBe(3000);
     });
@@ -112,7 +112,7 @@ describe('config', () => {
         (environment, expectedLevel) => {
           process.env.NODE_ENV = environment;
 
-          const config = require('./config').default;
+          const { config } = require('./config');
 
           expect(config.log.level).toBe(expectedLevel);
         }
@@ -125,7 +125,7 @@ describe('config', () => {
       test('Should be postgresql', () => {
         const client = 'postgresql';
 
-        const config = require('./config').default;
+        const { config } = require('./config');
 
         expect(config.db).toMatchObject({ client });
       });
@@ -138,7 +138,7 @@ describe('config', () => {
 
           process.env.PGHOST = host;
 
-          const config = require('./config').default;
+          const { config } = require('./config');
 
           expect(config.db.connection).toMatchObject({ host });
         });
@@ -158,7 +158,7 @@ describe('config', () => {
 
           process.env.PGPORT = port.toString();
 
-          const config = require('./config').default;
+          const { config } = require('./config');
 
           expect(config.db.connection).toMatchObject({ port });
         });
@@ -221,7 +221,7 @@ describe('config', () => {
 
           process.env.PGUSER = user;
 
-          const config = require('./config').default;
+          const { config } = require('./config');
 
           expect(config.db.connection).toMatchObject({ user });
         });
@@ -241,7 +241,7 @@ describe('config', () => {
 
           process.env.PGPASSWORD = password;
 
-          const config = require('./config').default;
+          const { config } = require('./config');
 
           expect(config.db.connection).toMatchObject({ password });
         });
@@ -261,7 +261,7 @@ describe('config', () => {
 
           process.env.PGDATABASE = database;
 
-          const config = require('./config').default;
+          const { config } = require('./config');
 
           expect(config.db.connection).toMatchObject({ database });
         });
@@ -277,8 +277,8 @@ describe('config', () => {
     });
 
     describe('migrations', () => {
-      test('Should be point to the correct migrations directory', () => {
-        const config = require('./config').default;
+      test('Should point to the correct migrations directory', () => {
+        const { config } = require('./config');
 
         expect(config.db.migrations.directory).toBe(
           `${__dirname}/infrastructure/db/migrations`
@@ -287,8 +287,8 @@ describe('config', () => {
     });
 
     describe('seeds', () => {
-      test('Should be point to the correct seeds directory', () => {
-        const config = require('./config').default;
+      test('Should point to the correct seeds directory', () => {
+        const { config } = require('./config');
 
         expect(config.db.seeds.directory).toBe(
           `${__dirname}/infrastructure/db/seeds`

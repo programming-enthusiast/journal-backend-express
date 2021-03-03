@@ -101,4 +101,4 @@ to assure good coding style and format before commits.
 
 ### [3.9 Require modules by folders, as opposed to the files directly](https://github.com/goldbergyoni/nodebestpractices#-39-require-modules-by-folders-as-opposed-to-the-files-directly)
 
-TODO
+As an example of this practice [see](./src/infrastructure). It also [avoids using default exports](https://basarat.gitbook.io/typescript/main-1/defaultisbad).

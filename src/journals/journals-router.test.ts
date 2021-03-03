@@ -1,29 +1,22 @@
 import * as journalsService from './journals-service';
-import db, { tables } from '../infrastructure/db';
-import { getToken, jwks } from '../test-utils/jwt';
+import { db, tables } from '../infrastructure/db';
+import { getToken, interceptGetJWKSRequest } from '../test-utils/jwt';
 import { isAfter, subDays } from 'date-fns';
 import { omit, orderBy } from 'lodash';
 import request, { Response } from 'supertest';
 import { JournalEntry } from './journal-entry';
 import { NotFoundError } from '../errors';
 import { ReasonPhrases } from 'http-status-codes';
-import app from '../app';
+import { app } from '../app';
 import { cleanDb } from '../test-utils/clean-db';
-import config from '../config';
-import nock from 'nock';
-import { orderByRegex } from '../query/options/order-by';
+import { orderByRegex } from '../query/order-by';
 
 describe('journals-router', () => {
   const userId = 'my user';
 
   const authorization = `Bearer ${getToken(userId)}`;
 
-  beforeEach(() => {
-    nock(config.auth0.issuer)
-      .persist()
-      .get('/.well-known/jwks.json')
-      .reply(200, jwks);
-  });
+  beforeEach(interceptGetJWKSRequest);
 
   afterEach(cleanDb);
 

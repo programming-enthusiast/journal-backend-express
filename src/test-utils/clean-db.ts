@@ -1,4 +1,4 @@
-import db, { tables } from '../infrastructure/db';
+import { db, tables } from '../infrastructure/db';
 import { Inspiration } from '../inspirations/inspiration';
 import { Journal } from '../journals/journal';
 import { JournalEntry } from '../journals/journal-entry';

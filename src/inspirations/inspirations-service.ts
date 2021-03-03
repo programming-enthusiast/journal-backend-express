@@ -1,4 +1,4 @@
-import db, { tables } from '../infrastructure/db';
+import { db, tables } from '../infrastructure/db';
 import { Inspiration } from './inspiration';
 import { NotFoundError } from '../errors';
 

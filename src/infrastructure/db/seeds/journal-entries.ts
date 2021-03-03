@@ -1,6 +1,6 @@
 import * as journalsService from '../../../journals/journals-service';
 import * as usersService from '../../../users/users-service';
-import db, { tables } from '..';
+import { db, tables } from '..';
 import { internet, lorem } from 'faker';
 import { JournalEntry } from '../../../journals/journal-entry';
 import inspirationTexts from './inspiration-texts.json';

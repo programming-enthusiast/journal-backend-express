@@ -1,4 +1,4 @@
-import { Ordering } from '../../enums/ordering';
+import { Ordering } from '../enums';
 
 export type OrderBy = { column: string; order: Ordering }[];
 

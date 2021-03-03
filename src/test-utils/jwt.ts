@@ -1,5 +1,6 @@
-import config from '../config';
+import { config } from '../config';
 import jwt from 'jsonwebtoken';
+import nock from 'nock';
 
 const privateKey = `
 -----BEGIN ENCRYPTED PRIVATE KEY-----
@@ -60,7 +61,7 @@ vM9JuoU09sApCMLwRjDeehsM2lR15kOwA3BmAoF+Inngi2bT7s6tsuqyzHpgzBes
 
 export const passphrase = 'my passphrase';
 
-export const jwks = {
+const jwks = {
   keys: [
     {
       kty: 'RSA',
@@ -72,6 +73,13 @@ export const jwks = {
       kid: '0',
     },
   ],
+};
+
+export const interceptGetJWKSRequest = (): void => {
+  nock(config.auth0.issuer)
+    .persist()
+    .get('/.well-known/jwks.json')
+    .reply(200, jwks);
 };
 
 export const getToken = (userId: string): string => {

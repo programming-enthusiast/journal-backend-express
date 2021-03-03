@@ -1,5 +1,5 @@
 import * as inspirationsService from './inspirations-service';
-import db, { tables } from '../infrastructure/db';
+import { db, tables } from '../infrastructure/db';
 import { Inspiration } from './inspiration';
 import { NotFoundError } from '../errors';
 import { cleanDb } from '../test-utils/clean-db';

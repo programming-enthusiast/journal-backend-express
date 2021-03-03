@@ -1,13 +1,13 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { checkJwt } from './auth/check-jwt';
 import cors from 'cors';
-import errorHandler from './error-handler';
+import { errorHandler } from './error-handler';
 import httpLogger from 'pino-http';
-import inspirationsRouter from './inspirations/inspirations-router';
-import journalsRouter from './journals/journals-router';
-import logger from './logger';
+import { inspirationsRouter } from './inspirations/inspirations-router';
+import { journalsRouter } from './journals/journals-router';
+import { logger } from './logger';
 
-const app = express();
+export const app = express();
 
 app.use(cors());
 
@@ -30,5 +30,3 @@ app.use(
     await errorHandler.handleError(error, res);
   }
 );
-
-export default app;

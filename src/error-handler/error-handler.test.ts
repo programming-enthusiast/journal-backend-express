@@ -4,8 +4,8 @@ import { NotFoundError } from '../errors';
 import { ReasonPhrases } from 'http-status-codes';
 import { Response } from 'express';
 import { UnauthorizedError } from 'express-jwt';
-import errorHandler from '.';
-import logger from '../logger';
+import { errorHandler } from './error-handler';
+import { logger } from '../logger';
 
 describe('error-handler', () => {
   let mockResponse: Partial<Response>;

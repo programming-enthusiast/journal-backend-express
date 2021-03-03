@@ -44,7 +44,7 @@ if (error) {
   throw new Error(`Config validation error: ${error.message}`);
 }
 
-const config: Config = {
+export const config: Config = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
   log: {
@@ -81,5 +81,3 @@ const config: Config = {
     issuer: envVars.AUTH0_ISSUER,
   },
 };
-
-export default config;

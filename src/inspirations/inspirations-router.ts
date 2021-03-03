@@ -2,31 +2,37 @@ import * as inspirationsService from './inspirations-service';
 import express, { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-const router = express.Router();
+export const inspirationsRouter = express.Router();
 
-router.post('/', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const inspiration = await inspirationsService.createInspiration(
-      req.body.text
-    );
+inspirationsRouter.post(
+  '/',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const inspiration = await inspirationsService.createInspiration(
+        req.body.text
+      );
 
-    res.status(StatusCodes.CREATED).json(inspiration);
-  } catch (err) {
-    next(err);
+      res.status(StatusCodes.CREATED).json(inspiration);
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);
 
-router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
-  try {
-    const inspirations = await inspirationsService.listInspirations();
+inspirationsRouter.get(
+  '/',
+  async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+      const inspirations = await inspirationsService.listInspirations();
 
-    res.json(inspirations);
-  } catch (err) {
-    next(err);
+      res.json(inspirations);
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);
 
-router.delete(
+inspirationsRouter.delete(
   '/:id',
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
@@ -40,5 +46,3 @@ router.delete(
     }
   }
 );
-
-export default router;

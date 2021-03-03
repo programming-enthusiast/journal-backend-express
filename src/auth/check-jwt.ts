@@ -1,4 +1,4 @@
-import config from '../config';
+import { config } from '../config';
 import jwksRsa from 'jwks-rsa';
 import jwt from 'express-jwt';
 

@@ -1,5 +1,5 @@
 import { orderByRegex, toOrderBy } from './order-by';
-import { Ordering } from '../../enums/ordering';
+import { Ordering } from '../enums';
 
 describe('order-by', () => {
   describe('orderByRegex', () => {

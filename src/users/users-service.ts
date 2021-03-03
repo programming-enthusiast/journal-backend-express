@@ -1,4 +1,4 @@
-import db, { tables } from '../infrastructure/db';
+import { db, tables } from '../infrastructure/db';
 import { User } from './user';
 
 export const createUser = async (id: string): Promise<User> => {

@@ -1,24 +1,17 @@
 import * as inspirationsService from './inspirations-service';
-import { getToken, jwks } from '../test-utils/jwt';
+import { getToken, interceptGetJWKSRequest } from '../test-utils/jwt';
 import request, { Response } from 'supertest';
 import { Inspiration } from './inspiration';
 import { NotFoundError } from '../errors';
 import { ReasonPhrases } from 'http-status-codes';
-import app from '../app';
-import config from '../config';
-import nock from 'nock';
+import { app } from '../app';
 
 describe('inspirations-router', () => {
   const userId = 'my admin id';
 
   const authorization = `Bearer ${getToken(userId)}`;
 
-  beforeEach(() => {
-    nock(config.auth0.issuer)
-      .persist()
-      .get('/.well-known/jwks.json')
-      .reply(200, jwks);
-  });
+  beforeEach(interceptGetJWKSRequest);
 
   describe('/api/v1/inspirations', () => {
     const baseUrl = '/api/v1/inspirations';

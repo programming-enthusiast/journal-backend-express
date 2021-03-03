@@ -1,4 +1,4 @@
-import db from '../src/infrastructure/db';
+import { db } from '../src/infrastructure/db';
 
 beforeAll(async () => {
   await db.migrate.latest();

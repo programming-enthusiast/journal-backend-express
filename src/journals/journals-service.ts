@@ -1,9 +1,9 @@
-import * as usersService from '../users/users-service';
-import db, { tables } from '../infrastructure/db';
+import { db, tables } from '../infrastructure/db';
 import { Journal } from './journal';
 import { JournalEntry } from './journal-entry';
 import { NotFoundError } from '../errors';
 import { QueryOptions } from '../query';
+import { usersService } from '../users';
 
 export const createJournal = async (
   userId: string,
