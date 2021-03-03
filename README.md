@@ -92,9 +92,13 @@ request before passing it to the route callback. [See](./src/journals/journals-r
 
 ## 3. Code Style Practices
 
-### 3.1 [Use eslint](https://github.com/goldbergyoni/nodebestpractices#-31-use-eslint)
+### [3.1 Use eslint](https://github.com/goldbergyoni/nodebestpractices#-31-use-eslint)
 
 I'm using [Typescript ESLint](https://github.com/typescript-eslint/typescript-eslint/#readme)
 combined with [`prettier`](https://github.com/prettier/eslint-config-prettier/#readme),
 [`husky`](https://typicode.github.io/husky/#/) and [`lint-staged`](https://github.com/okonet/lint-staged#readme)
 to assure good coding style and format before commits.
+
+### [3.9 Require modules by folders, as opposed to the files directly](https://github.com/goldbergyoni/nodebestpractices#-39-require-modules-by-folders-as-opposed-to-the-files-directly)
+
+TODO
