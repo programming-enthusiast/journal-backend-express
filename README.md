@@ -243,6 +243,23 @@ TODO
 
 I'm using [`eslint-lint-plugin-security`](https://github.com/nodesecurity/eslint-plugin-security).
 
+#### [6.2 Limit concurrent requests using a balancer or a middleware](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/limitrequests.md#limit-concurrent-requests-using-a-balancer-or-a-middleware)
+
+TODO
+
+#### [6.3 Extract secrets from config files or use npm package that encrypts them](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/secretmanagement.md)
+
+TODO: I'm using [`dotenv`](https://github.com/motdotla/dotenv#readme) to speed-up local
+development, but in Production I will use environment variables.
+
+#### [6.4 Preventing database injection vulnerabilities by using ORM/ODM libraries or other DAL packages](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/ormodmusage.md)
+
+I'm using [`knex`](https://github.com/knex/knex#knexjs) as my relational database
+data access library. The only [`raw`](http://knexjs.org/#Raw) queries are located
+in the migration files.
+
+#### [6.5 Common Node.js security best practices](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/commonsecuritybestpractices.md)
+
 ## Special Thanks
 
 Big thanks to [Carter Bancroft](https://carterbancroft.com/mocking-json-web-tokens-and-auth0/) for
