@@ -10,6 +10,7 @@ export const seed = async (): Promise<void> => {
   const userIds = [internet.email(), internet.email(), internet.email()];
 
   for (let i = 0; i < userIds.length; i++) {
+    // eslint-disable-next-line security/detect-object-injection
     const userId = userIds[i];
 
     const user = await usersService.createUser(userId);

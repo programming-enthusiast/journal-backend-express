@@ -1,8 +1,9 @@
 import * as journalsService from './journals-service';
 import { Joi, Segments, celebrate } from 'celebrate';
 import express, { NextFunction, Request, Response } from 'express';
-import { orderByRegex, toOrderBy } from '../query/order-by';
 import { StatusCodes } from 'http-status-codes';
+import { entriesOrderByRegex } from './order-by-regex';
+import { toOrderBy } from '../query';
 
 export const journalsRouter = express.Router();
 
@@ -86,7 +87,7 @@ journalsRouter.get(
   '/entries',
   celebrate({
     [Segments.QUERY]: {
-      orderBy: Joi.string().regex(orderByRegex),
+      orderBy: Joi.string().regex(entriesOrderByRegex),
     },
     [Segments.BODY]: Joi.object().keys({
       title: Joi.string(),

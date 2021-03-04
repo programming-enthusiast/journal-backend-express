@@ -9,7 +9,7 @@ import { NotFoundError } from '../errors';
 import { ReasonPhrases } from 'http-status-codes';
 import { app } from '../app';
 import { cleanDb } from '../test-utils/clean-db';
-import { orderByRegex } from '../query/order-by';
+import { entriesOrderByRegex } from './order-by-regex';
 
 describe('journals-router', () => {
   const userId = 'my user';
@@ -487,7 +487,7 @@ describe('journals-router', () => {
               expect(response.body).toStrictEqual({
                 error: {
                   code: ReasonPhrases.BAD_REQUEST,
-                  message: `"orderBy" with value "${invalidOrderBy}" fails to match the required pattern: ${orderByRegex}`,
+                  message: `"orderBy" with value "${invalidOrderBy}" fails to match the required pattern: ${entriesOrderByRegex}`,
                 },
               });
             });

@@ -241,6 +241,8 @@ TODO
 
 #### [6.1. Embrace linter security rules](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/lintrules.md)
 
+I'm using [`eslint-lint-plugin-security`](https://github.com/nodesecurity/eslint-plugin-security).
+
 ## Special Thanks
 
 Big thanks to [Carter Bancroft](https://carterbancroft.com/mocking-json-web-tokens-and-auth0/) for

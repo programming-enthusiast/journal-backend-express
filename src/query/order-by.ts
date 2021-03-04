@@ -2,10 +2,6 @@ import { Ordering } from '../enums';
 
 export type OrderBy = { column: string; order: Ordering }[];
 
-export const orderByRegex = new RegExp(
-  /^[a-zA-Z_]+(\s(asc|desc))?(\b\/[a-zA-Z_]+(\s(asc|desc))?)*$/
-);
-
 export const toOrderBy = (input: string): OrderBy => {
   const trimmedInput = input.trim();
 
