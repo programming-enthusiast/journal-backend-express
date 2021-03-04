@@ -227,6 +227,20 @@ TODO
 Set the [node engine](https://docs.npmjs.com/cli/v7/configuring-npm/package-json#engines) to ["^14.16.0"](https://nodejs.org/en/about/releases/).
 To see what this means, see this [StackOverflow answer](https://stackoverflow.com/a/22345808/819720).
 
+#### [5.18 Your application code should not handle log routing](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/production/logrouting.md#your-application-code-should-not-handle-log-routing)
+
+Logs are being written to `stdout/stderr`.
+
+TODO: use an aggregation service.
+
+#### [5.19](https://github.com/goldbergyoni/nodebestpractices#-519-install-your-packages-with-npm-ci)
+
+TODO
+
+### 6. Security Best Practices
+
+#### [6.1. Embrace linter security rules](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/lintrules.md)
+
 ## Special Thanks
 
 Big thanks to [Carter Bancroft](https://carterbancroft.com/mocking-json-web-tokens-and-auth0/) for
