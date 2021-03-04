@@ -4,6 +4,9 @@
   "description": "Journal App Backend, using Express.js",
   "private": true,
   "main": "dist/index.js",
+  "engines": {
+    "node": "^14.16.0"
+  },
   "scripts": {
     "build": "tsc -p .",
     "build:live": "nodemon -r dotenv/config --watch 'src/**/*.ts' --exec \"ts-node\" src/index.ts",
