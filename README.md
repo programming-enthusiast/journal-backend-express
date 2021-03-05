@@ -260,6 +260,52 @@ in the migration files.
 
 #### [6.5 Common Node.js security best practices](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/commonsecuritybestpractices.md)
 
+##### [Use SSL/TLS to encrypt the client-server connection](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/commonsecuritybestpractices.md#-use-ssltls-to-encrypt-the-client-server-connection)
+
+TODO
+
+##### [OWASP A2: Broken Authentication](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/commonsecuritybestpractices.md#-owasp-a2-broken-authentication)
+
+TODO
+
+##### [OWASP A5:  Broken access control](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/commonsecuritybestpractices.md#-owasp-a5-broken-access-control)
+
+TODO
+
+##### [OWASP A6: Security Misconfiguration](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/commonsecuritybestpractices.md#-owasp-a6-security-misconfiguration)
+
+##### [OWASP A3: Sensitive Data Exposure](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/commonsecuritybestpractices.md#-owasp-a3-sensitive-data-exposure)
+
+TODO
+
+##### [OWASP A9: Using Components With Known Security Vulneraibilities](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/commonsecuritybestpractices.md#-owasp-a9-using-components-with-known-security-vulneraibilities)
+
+TODO
+
+##### [OWASP A10: Insufficient Logging & Monitoring](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/commonsecuritybestpractices.md#-owasp-a10-insufficient-logging--monitoring)
+
+TODO
+
+##### [OWASP A7: Cross-Site-Scripting (XSS)](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/commonsecuritybestpractices.md#-owasp-a7-cross-site-scripting-xss)
+
+TODO
+
+##### [Protect Personally Identifyable Information (PII Data)](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/commonsecuritybestpractices.md#-protect-personally-identifyable-information-pii-data)
+
+TODO
+
+##### [Have a security.txt File [PRODUCTION]](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/commonsecuritybestpractices.md#-have-a-securitytxt-file-production)
+
+TODO
+
+##### [Have a SECURITY.md File [OPEN SOURCE]](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/commonsecuritybestpractices.md#-have-a-securitymd-file-open-source)
+
+TODO
+
+#### [6.6. Adjust the HTTP response headers for enhanced security](https://github.com/goldbergyoni/nodebestpractices#-66-adjust-the-http-response-headers-for-enhanced-security)
+
+TODO
+
 ## Special Thanks
 
 Big thanks to [Carter Bancroft](https://carterbancroft.com/mocking-json-web-tokens-and-auth0/) for
