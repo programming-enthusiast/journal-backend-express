@@ -304,7 +304,7 @@ TODO
 
 #### [6.6. Adjust the HTTP response headers for enhanced security](https://github.com/goldbergyoni/nodebestpractices#-66-adjust-the-http-response-headers-for-enhanced-security)
 
-TODO
+I'm using [`helmet`](https://helmetjs.github.io/) for that.
 
 ## Special Thanks
 
