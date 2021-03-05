@@ -2,7 +2,7 @@ import { db, tables } from '../infrastructure/db';
 import { Inspiration } from './inspiration';
 import { NotFoundError } from '../errors';
 
-export const createInspiration = async (text: string): Promise<Inspiration> => {
+async function createInspiration(text: string): Promise<Inspiration> {
   const inspiration: Partial<Inspiration> = {
     text,
   };
@@ -12,21 +12,21 @@ export const createInspiration = async (text: string): Promise<Inspiration> => {
     .returning('*');
 
   return result[0];
-};
+}
 
-const getInspiration = async (id: string): Promise<Inspiration | null> => {
+async function getInspiration(id: string): Promise<Inspiration | null> {
   const result = await db<Inspiration>(tables.inspirations)
     .where('id', id)
     .first();
 
   return result ? result : null;
-};
+}
 
-export const listInspirations = async (): Promise<Inspiration[]> => {
+async function listInspirations(): Promise<Inspiration[]> {
   return await db<Inspiration>(tables.inspirations);
-};
+}
 
-export const deleteInspiration = async (id: string): Promise<void> => {
+async function deleteInspiration(id: string): Promise<void> {
   const inspiration = await getInspiration(id);
 
   if (!inspiration) {
@@ -34,4 +34,11 @@ export const deleteInspiration = async (id: string): Promise<void> => {
   }
 
   await db<Inspiration>(tables.inspirations).where('id', id).del();
+}
+
+export {
+  createInspiration,
+  getInspiration,
+  listInspirations,
+  deleteInspiration,
 };

@@ -5,10 +5,7 @@ import { NotFoundError } from '../errors';
 import { QueryOptions } from '../query';
 import { usersService } from '../users';
 
-export const createJournal = async (
-  userId: string,
-  title: string
-): Promise<Journal> => {
+async function createJournal(userId: string, title: string): Promise<Journal> {
   let user = await usersService.getUser(userId);
 
   if (!user) {
@@ -20,9 +17,9 @@ export const createJournal = async (
     .returning('*');
 
   return result[0];
-};
+}
 
-const getJournal = async (userId: string): Promise<Journal | null> => {
+async function getJournal(userId: string): Promise<Journal | null> {
   const user = await usersService.getUser(userId);
 
   if (!user) {
@@ -38,17 +35,17 @@ const getJournal = async (userId: string): Promise<Journal | null> => {
   }
 
   return journal;
-};
+}
 
 /**
  * Creates a new JournalEntry or updates it if there is one already created for the
  * current date.
  */
-export const createOrUpdateEntry = async (
+async function createOrUpdateEntry(
   userId: string,
   title: string,
   text: string
-): Promise<JournalEntry> => {
+): Promise<JournalEntry> {
   const journal = await getJournal(userId);
 
   if (!journal) {
@@ -77,9 +74,9 @@ export const createOrUpdateEntry = async (
     .returning('*');
 
   return result[0];
-};
+}
 
-const getEntry = async (id: string): Promise<JournalEntry | null> => {
+async function getEntry(id: string): Promise<JournalEntry | null> {
   const entry = await db<JournalEntry>(tables.entries).where('id', id).first();
 
   if (!entry) {
@@ -87,15 +84,15 @@ const getEntry = async (id: string): Promise<JournalEntry | null> => {
   }
 
   return entry;
-};
+}
 
-export const updateEntry = async (
+async function updateEntry(
   userId: string,
   entryId: string,
   data: Partial<
     Omit<JournalEntry, 'id' | 'journalId' | 'createdAt' | 'updatedAt'>
   >
-): Promise<JournalEntry> => {
+): Promise<JournalEntry> {
   const journal = await getJournal(userId);
 
   if (!journal) {
@@ -118,12 +115,12 @@ export const updateEntry = async (
     .returning('*');
 
   return result[0];
-};
+}
 
-export const listEntries = async (
+async function listEntries(
   userId: string,
   queryMethods?: QueryOptions<Omit<JournalEntry, 'journalId'>>
-): Promise<JournalEntry[]> => {
+): Promise<JournalEntry[]> {
   const journal = await getJournal(userId);
 
   if (!journal) {
@@ -134,4 +131,6 @@ export const listEntries = async (
     .where({ journalId: journal.id })
     .where(queryMethods?.where ? queryMethods.where : {})
     .orderBy(queryMethods?.orderBy ? queryMethods.orderBy : []);
-};
+}
+
+export { createJournal, createOrUpdateEntry, listEntries, updateEntry };

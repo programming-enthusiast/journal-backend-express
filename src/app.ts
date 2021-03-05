@@ -8,7 +8,7 @@ import { inspirationsRouter } from './inspirations/inspirations-router';
 import { journalsRouter } from './journals/journals-router';
 import { logger } from './logger';
 
-export const app = express();
+const app = express();
 
 app.use(cors());
 
@@ -33,3 +33,5 @@ app.use(
     await errorHandler.handleError(error, res);
   }
 );
+
+export { app };

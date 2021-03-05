@@ -90,6 +90,11 @@ I'm using [`celebrate`](https://github.com/arb/celebrate/#readme), a middleware
 build on top of [`joi`](https://github.com/sideway/joi#readme), to validate the
 request before passing it to the route callback. [See](./src/journals/journals-router.ts).
 
+#### [2.12 Always await promises before returning to avoid a partial stacktrace](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/errorhandling/returningpromises.md)
+
+All [`async`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function#description) function calls are
+being `await`ed.
+
 ### 3. Code Style Practices
 
 #### [3.1 Use eslint](https://github.com/goldbergyoni/nodebestpractices#-31-use-eslint)
@@ -98,6 +103,22 @@ I'm using [Typescript ESLint](https://github.com/typescript-eslint/typescript-es
 combined with [`prettier`](https://github.com/prettier/eslint-config-prettier/#readme),
 [`husky`](https://typicode.github.io/husky/#/) and [`lint-staged`](https://github.com/okonet/lint-staged#readme)
 to assure good coding style and format before commits.
+
+#### [3.2 Node.js specific plugins](https://github.com/goldbergyoni/nodebestpractices#-32-nodejs-specific-plugins)
+
+I'm using [`eslint-plugin-security`](https://www.npmjs.com/package/eslint-plugin-security).
+
+#### [3.3 Start a Codeblock's Curly Braces on the Same Line](https://github.com/goldbergyoni/nodebestpractices#-33-start-a-codeblocks-curly-braces-on-the-same-line)
+
+This is being enforced by [`@typescript-eslint/eslint-plugin`](https://www.npmjs.com/package/@typescript-eslint/eslint-plugin).
+
+#### [3.4 Separate your statements properly](https://github.com/goldbergyoni/nodebestpractices#-34-separate-your-statements-properly)
+
+Semi-colons are being enforced with [`eslint-config-prettier`](https://github.com/prettier/eslint-config-prettier).
+
+#### [3.5 Name your functions](https://github.com/goldbergyoni/nodebestpractices#-35-name-your-functions)
+
+I'm using `function` instead of `const` to declare functions. For a discussion on the topic, [see](https://stackoverflow.com/questions/33040703/proper-use-of-const-for-defining-functions-in-javascript).
 
 #### [3.9 Require modules by folders, as opposed to the files directly](https://github.com/goldbergyoni/nodebestpractices#-39-require-modules-by-folders-as-opposed-to-the-files-directly)
 
@@ -305,6 +326,84 @@ TODO
 #### [6.6. Adjust the HTTP response headers for enhanced security](https://github.com/goldbergyoni/nodebestpractices#-66-adjust-the-http-response-headers-for-enhanced-security)
 
 I'm using [`helmet`](https://helmetjs.github.io/) for that.
+
+#### [6.7 Constantly and automatically inspect for vulnerable dependencies](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/dependencysecurity.md)
+
+TODO
+
+#### [6.8. Protect Users' Passwords/Secrets using bcrypt or scrypt](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/userpasswords.md)
+
+I'm not storing User passwords nor secrets. Instead, I'm using [Auth0](https://auth0.com/).
+
+#### [6.9. Escape HTML, JS and CSS output](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/escape-output.md)
+
+TODO
+
+#### [6.10. Validate incoming JSON schemas](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/validation.md)
+
+I'm using [`celebrate`](https://github.com/arb/celebrate) to validate incoming payloads. [See](./src/journals/journals-router.ts).
+
+#### [6.11. Support blocklisting JWTs](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/expirejwt.md)
+
+TODO
+
+#### [6.12 Prevent brute-force attacks against authorization](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/login-rate-limit.md)
+
+TODO
+
+#### [6.13. Run Node.js as non-root user](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/non-root-user.md)
+
+TODO
+
+#### [6.14 Limit payload size using a reverse-proxy or a middleware](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/requestpayloadsizelimit.md)
+
+TODO
+
+#### [6.15. Avoid JavaScript eval statements](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/avoideval.md)
+
+Not using any of these functions.
+
+#### [6.16 Prevent evil RegEx from overloading your single thread execution](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/regex.md)
+
+I'm using [node-re2](https://github.com/uhop/node-re2/#README). According to it's documentation:
+
+> RE2 consciously avoids any regular expression features that require worst-case exponential time to evaluate[...]RE2 will throw a SyntaxError if you try to declare a regular expression using these features.
+
+#### [6.17 Avoid module loading using a variable](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/safemoduleloading.md)
+
+This is being avoided.
+
+#### [6.18 Run unsafe code in a sandbox](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/sandbox.md)
+
+TODO.
+
+#### [6.19. Take extra care when working with child processes](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/childprocesses.md)
+
+I'm not using the `child_process` module in the `express` application.
+
+#### [6.20. Hide error details from clients](https://github.com/goldbergyoni/nodebestpractices#-620-hide-error-details-from-clients)
+
+I'm returning only an error code and the `Error` message in some cases. [See](./src/error-handler/error-handler.ts).
+
+#### [6.21. Configure 2FA for npm or Yarn](https://github.com/goldbergyoni/nodebestpractices#-621-configure-2fa-for-npm-or-yarn)
+
+No packages are being published to [`npm`](https://www.npmjs.com/).
+
+#### [6.22 Modify session middleware settings](https://github.com/goldbergyoni/nodebestpractices#-622-modify-session-middleware-settings)
+
+TODO
+
+#### [6.23. Avoid DOS attacks by explicitly setting when a process should crash](https://github.com/goldbergyoni/nodebestpractices#-623-avoid-dos-attacks-by-explicitly-setting-when-a-process-should-crash)
+
+TODO
+
+#### [6.24 Prevent unsafe redirects](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/saferedirects.md#prevent-unsafe-redirects)
+
+This application is not doing redirects.
+
+#### [6.25. Avoid publishing secrets to the npm registry](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/avoid_publishing_secrets.md)
+
+No packages are being published to [`npm`](https://www.npmjs.com/).
 
 ## Special Thanks
 

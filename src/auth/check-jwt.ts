@@ -2,7 +2,7 @@ import { config } from '../config';
 import jwksRsa from 'jwks-rsa';
 import jwt from 'express-jwt';
 
-export const checkJwt = jwt({
+const checkJwt = jwt({
   secret: jwksRsa.expressJwtSecret({
     cache: true,
     rateLimit: true,
@@ -13,3 +13,5 @@ export const checkJwt = jwt({
   issuer: config.auth0.issuer,
   algorithms: ['RS256'],
 });
+
+export { checkJwt };

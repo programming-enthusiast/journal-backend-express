@@ -1,8 +1,8 @@
 import { Ordering } from '../enums';
 
-export type OrderBy = { column: string; order: Ordering }[];
+type OrderBy = { column: string; order: Ordering }[];
 
-export const toOrderBy = (input: string): OrderBy => {
+function toOrderBy(input: string): OrderBy {
   const trimmedInput = input.trim();
 
   if (!trimmedInput) {
@@ -17,4 +17,6 @@ export const toOrderBy = (input: string): OrderBy => {
       order: pair[1] in Ordering ? (pair[1] as Ordering) : Ordering.asc,
     };
   });
-};
+}
+
+export { OrderBy, toOrderBy };

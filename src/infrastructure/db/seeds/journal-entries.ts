@@ -6,7 +6,7 @@ import { JournalEntry } from '../../../journals/journal-entry';
 import inspirationTexts from './inspiration-texts.json';
 import { sample } from 'lodash';
 
-export const seed = async (): Promise<void> => {
+async function seed(): Promise<void> {
   const userIds = [internet.email(), internet.email(), internet.email()];
 
   for (let i = 0; i < userIds.length; i++) {
@@ -28,4 +28,6 @@ export const seed = async (): Promise<void> => {
       });
     }
   }
-};
+}
+
+export { seed };

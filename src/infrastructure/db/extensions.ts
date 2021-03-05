@@ -1,3 +1,5 @@
-export const CREATE_UUID = `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`;
+const CREATE_UUID = `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`;
 
-export const DROP_UUID = `DROP EXTENSION IF EXISTS "uuid-ossp";`;
+const DROP_UUID = `DROP EXTENSION IF EXISTS "uuid-ossp";`;
+
+export { CREATE_UUID, DROP_UUID };

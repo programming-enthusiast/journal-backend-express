@@ -1,4 +1,4 @@
-export class NotFoundError extends Error {
+class NotFoundError extends Error {
   constructor(public readonly message: string) {
     super(message);
 
@@ -6,3 +6,5 @@ export class NotFoundError extends Error {
     Object.setPrototypeOf(this, NotFoundError.prototype);
   }
 }
+
+export { NotFoundError };

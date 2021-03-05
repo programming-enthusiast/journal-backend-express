@@ -4,4 +4,6 @@ import knexStringcase from 'knex-stringcase';
 
 const options = knexStringcase(config.db);
 
-export const db = knex(options);
+const db = knex(options);
+
+export { db };

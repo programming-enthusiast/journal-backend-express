@@ -2,7 +2,7 @@ import * as inspirationsService from './inspirations-service';
 import express, { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-export const inspirationsRouter = express.Router();
+const inspirationsRouter = express.Router();
 
 inspirationsRouter.post(
   '/',
@@ -46,3 +46,5 @@ inspirationsRouter.delete(
     }
   }
 );
+
+export { inspirationsRouter };

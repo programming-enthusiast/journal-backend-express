@@ -1,4 +1,4 @@
-export interface JournalEntry {
+interface JournalEntry {
   id: string;
   journalId: string;
   title: string;
@@ -6,3 +6,5 @@ export interface JournalEntry {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export { JournalEntry };

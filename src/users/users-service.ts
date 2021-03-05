@@ -1,13 +1,13 @@
 import { db, tables } from '../infrastructure/db';
 import { User } from './user';
 
-export const createUser = async (id: string): Promise<User> => {
+async function createUser(id: string): Promise<User> {
   const result = await db<User>(tables.users).insert({ id }).returning('*');
 
   return result[0];
-};
+}
 
-export const getUser = async (id: string): Promise<User | null> => {
+async function getUser(id: string): Promise<User | null> {
   const user = await db<User>(tables.users).where({ id }).first();
 
   if (!user) {
@@ -15,4 +15,6 @@ export const getUser = async (id: string): Promise<User | null> => {
   }
 
   return user;
-};
+}
+
+export { createUser, getUser };

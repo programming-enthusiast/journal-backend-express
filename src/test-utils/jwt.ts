@@ -59,7 +59,7 @@ vM9JuoU09sApCMLwRjDeehsM2lR15kOwA3BmAoF+Inngi2bT7s6tsuqyzHpgzBes
 -----END ENCRYPTED PRIVATE KEY-----
 `;
 
-export const passphrase = 'my passphrase';
+const passphrase = 'my passphrase';
 
 const jwks = {
   keys: [
@@ -75,14 +75,14 @@ const jwks = {
   ],
 };
 
-export const interceptGetJWKSRequest = (): void => {
+function interceptGetJWKSRequest(): void {
   nock(config.auth0.issuer)
     .persist()
     .get('/.well-known/jwks.json')
     .reply(200, jwks);
-};
+}
 
-export const getToken = (userId: string): string => {
+function getToken(userId: string): string {
   const user = {
     sub: userId,
   };
@@ -96,4 +96,6 @@ export const getToken = (userId: string): string => {
   };
 
   return jwt.sign(user, { key: privateKey, passphrase }, options);
-};
+}
+
+export { passphrase, interceptGetJWKSRequest, getToken };

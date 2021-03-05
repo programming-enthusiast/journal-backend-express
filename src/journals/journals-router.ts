@@ -5,7 +5,7 @@ import { StatusCodes } from 'http-status-codes';
 import { entriesOrderByRegex } from './order-by-regex';
 import { toOrderBy } from '../query';
 
-export const journalsRouter = express.Router();
+const journalsRouter = express.Router();
 
 journalsRouter.post(
   '/',
@@ -110,3 +110,5 @@ journalsRouter.get(
     }
   }
 );
+
+export { journalsRouter };

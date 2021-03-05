@@ -4,7 +4,7 @@ import * as functions from '../functions';
 import * as triggers from '../triggers';
 import { tables } from '..';
 
-export async function up(knex: Knex): Promise<void> {
+async function up(knex: Knex): Promise<void> {
   await knex.raw(extensions.CREATE_UUID);
 
   await knex.raw(functions.ON_UPDATE_TIMESTAMP_FUNCTION);
@@ -49,7 +49,7 @@ export async function up(knex: Knex): Promise<void> {
   await knex.raw(triggers.onUpdateTrigger(tables.entries));
 }
 
-export async function down(knex: Knex): Promise<void> {
+async function down(knex: Knex): Promise<void> {
   await knex.schema.dropTableIfExists(tables.inspirations);
   await knex.schema.dropTableIfExists(tables.entries);
   await knex.schema.dropTableIfExists(tables.journals);
@@ -57,3 +57,5 @@ export async function down(knex: Knex): Promise<void> {
   await knex.raw(functions.DROP_ON_UPDATE_TIMESTAMP_FUNCTION);
   await knex.raw(extensions.DROP_UUID);
 }
+
+export { up, down };
