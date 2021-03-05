@@ -120,9 +120,33 @@ Semi-colons are being enforced with [`eslint-config-prettier`](https://github.co
 
 I'm using `function` instead of `const` to declare functions. For a discussion on the topic, [see](https://stackoverflow.com/questions/33040703/proper-use-of-const-for-defining-functions-in-javascript).
 
+#### [3.6 Use naming conventions for variables, constants, functions and classes](https://github.com/goldbergyoni/nodebestpractices#-36-use-naming-conventions-for-variables-constants-functions-and-classes)
+
+I'm using lowerCamelCase when naming constants, variables and functions and UpperCamelCase (capital first letter as well) when naming classes.
+
+#### [3.7 Prefer const over let. Ditch the var](https://github.com/goldbergyoni/nodebestpractices#-37-prefer-const-over-let-ditch-the-var)
+
+There are no `var` declarations in the code.
+
+#### [3.8 Require modules first, not inside functions](https://github.com/goldbergyoni/nodebestpractices#-38-require-modules-first-not-inside-functions)
+
+All no `import`/`require` statements in the application code are on the top of the files.
+
 #### [3.9 Require modules by folders, as opposed to the files directly](https://github.com/goldbergyoni/nodebestpractices#-39-require-modules-by-folders-as-opposed-to-the-files-directly)
 
 As an example of this practice [see](./src/infrastructure). It also [avoids using default exports](https://basarat.gitbook.io/typescript/main-1/defaultisbad).
+
+#### [3.10 Use the === operator](https://github.com/goldbergyoni/nodebestpractices#-310-use-the--operator)
+
+I'm only using the `===` for equality comparisons.
+
+#### [3.11 Use Async Await, avoid callbacks](https://github.com/goldbergyoni/nodebestpractices#-311-use-async-await-avoid-callbacks)
+
+I'm using `async/await` instead of callbacks.
+
+#### [3.12 Use arrow function expressions (=>)](https://github.com/goldbergyoni/nodebestpractices#-312-use-arrow-function-expressions-)
+
+Arrow function expressions are being used whenever declaring a named function feels cumbersome.
 
 ### 4. Testing And Overall Quality Practices
 
@@ -139,6 +163,10 @@ test names.
 #### [4.3 Structure tests by the AAA pattern](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/testingandquality/aaa.md)
 
 [Yes](./src/journals/journals-service.test.ts).
+
+#### [4.4 Detect code issues with a linter](https://github.com/goldbergyoni/nodebestpractices#-44-detect-code-issues-with-a-linter)
+
+I'm using [`eslint`](https://eslint.org/).
 
 #### [4.5 Avoid global test fixtures and seeds, add data per-test](https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/testingandquality/avoid-global-test-fixture.md)
 
