@@ -2,12 +2,8 @@
 describe('config', () => {
   const OLD_ENV = process.env;
 
-  beforeEach(() => {
+  afterEach(() => {
     process.env = { ...OLD_ENV };
-  });
-
-  afterAll(() => {
-    process.env = OLD_ENV;
   });
 
   describe('env', () => {
@@ -273,26 +269,6 @@ describe('config', () => {
             require('./config');
           }).toThrow('Config validation error: "PGDATABASE" is required');
         });
-      });
-    });
-
-    describe('migrations', () => {
-      test('Should point to the correct migrations directory', () => {
-        const { config } = require('./config');
-
-        expect(config.db.migrations.directory).toBe(
-          `${__dirname}/infrastructure/db/migrations`
-        );
-      });
-    });
-
-    describe('seeds', () => {
-      test('Should point to the correct seeds directory', () => {
-        const { config } = require('./config');
-
-        expect(config.db.seeds.directory).toBe(
-          `${__dirname}/infrastructure/db/seeds`
-        );
       });
     });
   });

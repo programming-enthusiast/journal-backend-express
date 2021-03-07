@@ -1,8 +1,8 @@
 import * as Knex from 'knex';
-import * as extensions from '../extensions';
-import * as functions from '../functions';
-import * as triggers from '../triggers';
-import { tables } from '..';
+import * as extensions from '../src/infrastructure/db/extensions';
+import * as functions from '../src/infrastructure/db/functions';
+import * as triggers from '../src/infrastructure/db/triggers';
+import { tables } from '../src/infrastructure/db';
 
 async function up(knex: Knex): Promise<void> {
   await knex.raw(extensions.CREATE_UUID);

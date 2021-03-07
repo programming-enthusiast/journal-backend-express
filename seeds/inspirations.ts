@@ -1,4 +1,4 @@
-import * as inspirationsService from '../../../inspirations/inspirations-service';
+import * as inspirationsService from '../src/inspirations/inspirations-service';
 import texts from './inspiration-texts.json';
 
 async function seed(): Promise<void> {

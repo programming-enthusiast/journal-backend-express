@@ -68,12 +68,6 @@ const config: Config = {
       password: envVars.PGPASSWORD,
       database: envVars.PGDATABASE,
     },
-    migrations: {
-      directory: `${__dirname}/infrastructure/db/migrations`,
-    },
-    seeds: {
-      directory: `${__dirname}/infrastructure/db/seeds`,
-    },
   },
   auth0: {
     jwksUri: envVars.AUTH0_JWKS_URI,
