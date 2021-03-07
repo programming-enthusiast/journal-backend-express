@@ -1,8 +1,8 @@
-import * as journalsService from '../src/journals/journals-service';
-import * as usersService from '../src/users/users-service';
-import { db, tables } from '../src/infrastructure/db';
+import * as journalsService from '../../src/journals/journals-service';
+import * as usersService from '../../src/users/users-service';
+import { db, tables } from '../../src/infrastructure/db';
 import { internet, lorem } from 'faker';
-import { JournalEntry } from '../src/journals/journal-entry';
+import { JournalEntry } from '../../src/journals/journal-entry';
 import inspirationTexts from './inspiration-texts.json';
 import { sample } from 'lodash';
 
