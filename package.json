@@ -13,7 +13,7 @@
     "format": "prettier --write .",
     "gen-key-pair": "ts-node -r ./scripts/generateKeyPair",
     "lint": "eslint --fix --ext .js,.ts .",
-    "migrate:latest": "ts-node -r dotenv/config scripts/migrate",
+    "migrate:latest": "ts-node -r dotenv/config scripts/migrate-latest",
     "migrate:rollback": "ts-node -r dotenv/config scripts/rollback",
     "ms": "npm run migrate:rollback && npm run migrate:latest && npm run seed",
     "postinstall": "husky install",
